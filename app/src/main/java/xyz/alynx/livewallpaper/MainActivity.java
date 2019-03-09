@@ -35,6 +35,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private final static String TAG = "MainActivity";
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             }
             String path = strings[1];
             for (WallpaperCard card : cards) {
-                if (card.getPath().equals(path)) {
+                if (Objects.equals(card.getPath(), path)) {
                     Snackbar.make(
                         findViewById(R.id.coordinator_layout),
                         String.format(

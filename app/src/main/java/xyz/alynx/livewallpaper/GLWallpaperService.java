@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class GLWallpaperService extends WallpaperService {
     private final static String TAG = "GLWallpaperService";
@@ -84,6 +85,7 @@ public class GLWallpaperService extends WallpaperService {
 
         @Override
         public void onDestroy() {
+            Log.d(TAG, "Engine destroy");
             stopPlayer();
             glSurfaceView.onDestroy();
             super.onDestroy();
@@ -133,12 +135,20 @@ public class GLWallpaperService extends WallpaperService {
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
-                    if (oldWallpaperCard != null &&
-                        oldWallpaperCard.getPath().equals(wallpaperCard.getPath())) {
-                        mediaPlayer.seekTo(progress);
-                    }
                     renderer.setVideoSize(mediaPlayer.getVideoWidth(), mediaPlayer.getVideoHeight());
+                    if (oldWallpaperCard != null &&
+                        Objects.equals(oldWallpaperCard.getPath(), wallpaperCard.getPath())) {
+                        mediaPlayer.seekTo(progress);
+                    } else {
+                        mediaPlayer.seekTo(0);
+                    }
+                }
+            });
+            mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+                @Override
+                public void onSeekComplete(MediaPlayer mp) {
                     mediaPlayer.start();
+                    Log.d(TAG, "progress: " + mediaPlayer.getCurrentPosition());
                 }
             });
             try {
@@ -164,10 +174,10 @@ public class GLWallpaperService extends WallpaperService {
         private void stopPlayer() {
             Log.d(TAG, "Stopping playing");
             if (mediaPlayer != null) {
-                mediaPlayer.stop();
                 if (mediaPlayer.isPlaying()) {
                     progress = mediaPlayer.getCurrentPosition();
                 }
+                mediaPlayer.stop();
                 mediaPlayer.reset();
                 mediaPlayer.release();
                 mediaPlayer = null;
