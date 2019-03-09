@@ -174,9 +174,8 @@ public class GLWallpaperService extends WallpaperService {
         private void stopPlayer() {
             Log.d(TAG, "Stopping playing");
             if (mediaPlayer != null) {
-                if (mediaPlayer.isPlaying()) {
-                    progress = mediaPlayer.getCurrentPosition();
-                }
+                mediaPlayer.pause();
+                progress = mediaPlayer.getCurrentPosition();
                 mediaPlayer.stop();
                 mediaPlayer.reset();
                 mediaPlayer.release();
