@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wallpaper
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:thumbnail="@drawable/ic_icon"
+    android:description="@string/wallpaper_description"
+    android:settingsActivity="xyz.alynx.LiveWallpaper.MainActivity" />

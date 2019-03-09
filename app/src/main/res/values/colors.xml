@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#0ea5c6</color>
+    <color name="colorPrimaryDark">#074684</color>
+    <color name="colorAccent">#008577</color>
+    <color name="fab">#0ea5c6</color>
+    <color name="navigationBarColor">#0ea5c6</color>
+    <color name="viewBg">#f1f5f8</color>
+    <color name="name">#4c4c4c</color>
+    <color name="internal">#0077cd</color>
+</resources>

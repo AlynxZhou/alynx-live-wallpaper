@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Alynx Live Wallpaper</string>
+    <string name="action_remove">Remove</string>
+    <string name="saber_sandwich">Saber Eating Sandwich</string>
+    <string name="wallpaper_description">Alynx Live Wallpaper</string>
+    <string name="path">Path:</string>
+    <string name="name">Name:</string>
+    <string name="enter_wallpaper_name">Enter wallpaper name</string>
+    <string name="choose_file">Choose</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="add_wallpaper">Add Wallpaper</string>
+    <string name="internal">Internal</string>
+    <string name="wallpaper_thumbnail">Wallpaper thumbnail</string>
+    <string name="adding_wallpaper">Adding a wallpaper…</string>
+    <string name="added_wallpaper">Added wallpaper %s</string>
+    <string name="same_wallpaper">%s and %s have the same path</string>
+    <string name="no_thumbnail">Failed to generate thumbnail for %s</string>
+</resources>
