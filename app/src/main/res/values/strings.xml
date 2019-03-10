@@ -1,6 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Alynx Live Wallpaper</string>
     <string name="action_remove">Remove</string>
+    <string name="action_about">About</string>
     <string name="saber_sandwich">Saber Eating Sandwich</string>
     <string name="wallpaper_description">Alynx Live Wallpaper</string>
     <string name="path">Path:</string>
@@ -16,4 +18,10 @@
     <string name="added_wallpaper">Added wallpaper %s</string>
     <string name="same_wallpaper">%s and %s have the same path</string>
     <string name="no_thumbnail">Failed to generate thumbnail for %s</string>
+    <string name="app_detail">This is a live wallpaper app which allows you to choose video as wallpaper.\n\nTouch thumbnail on card list to choose a video.\n\nNeeds GLESv3 support for video cutting.\n\nSome icon are gotten from https://www.flaticon.com/, thanks to author Freepik for app icon, Hanan for add icon on button and Daniel Bruce for check icon on button.</string>
+    <string name="app_author">Alynx Zhou</string>
+    <string name="app_author_link">https://alynx.xyz/</string>
+    <string name="app_link">Project homepage: https://livewallpaper.alynx.xyz/</string>
+    <string name="app_version">Version %s</string>
+    <string name="empty_name_or_path">Cannot add wallpaper with empty name or path</string>
 </resources>

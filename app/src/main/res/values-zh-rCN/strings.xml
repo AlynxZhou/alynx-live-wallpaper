@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Alynx 动态壁纸</string>
+    <string name="action_remove">删除</string>
+    <string name="action_about">关于</string>
+    <string name="saber_sandwich">吃三明治的 Saber</string>
+    <string name="wallpaper_description">Alynx 动态壁纸</string>
+    <string name="path">路径：</string>
+    <string name="name">名称：</string>
+    <string name="enter_wallpaper_name">输入一个壁纸名称</string>
+    <string name="choose_file">选择</string>
+    <string name="ok">确认</string>
+    <string name="cancel">取消</string>
+    <string name="add_wallpaper">添加壁纸</string>
+    <string name="internal">内置</string>
+    <string name="wallpaper_thumbnail">壁纸缩略图</string>
+    <string name="adding_wallpaper">正在添加壁纸……</string>
+    <string name="added_wallpaper">已添加壁纸 %s</string>
+    <string name="same_wallpaper">%s 和 %s 是同一路径</string>
+    <string name="no_thumbnail">为 %s 生成缩略图失败</string>
+    <string name="app_detail">一个支持选择视频作为动态壁纸的应用。\n\n点击卡片列表上的缩略图以选择一个壁纸。\n\n为了剪裁视频尺寸，需要设备支持 GLESv3。\n\n一些图标获取自 https://www.flaticon.com/，感谢应用图标的作者 Freepik、添加按钮图标的作者 Hanan 和完成按钮图标的作者 Daniel Bruce。</string>
+    <string name="app_author">Alynx Zhou</string>
+    <string name="app_author_link">https://alynx.xyz/</string>
+    <string name="app_link">项目主页：https://livewallpaper.alynx.xyz/</string>
+    <string name="app_version">版本 %s</string>
+    <string name="empty_name_or_path">无法添加名称或路径为空的壁纸</string>
+</resources>

@@ -1,3 +1,19 @@
+/**
+ * Copyright 2019 Alynx Zhou
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package xyz.alynx.livewallpaper;
 
 import android.content.Context;
@@ -6,7 +22,6 @@ import android.media.MediaPlayer;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
 import android.view.Surface;
 
 import java.nio.ByteBuffer;
@@ -51,7 +66,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             1.0f, 1.0f
         };
         vertices = ByteBuffer.allocateDirect(
-                vertexArray.length * BYTES_PER_FLOAT
+            vertexArray.length * BYTES_PER_FLOAT
         ).order(ByteOrder.nativeOrder()).asFloatBuffer();
         vertices.put(vertexArray);
 
@@ -67,7 +82,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             1.0f, 0.0f
         };
         texCoords = ByteBuffer.allocateDirect(
-                texCoordArray.length * BYTES_PER_FLOAT
+            texCoordArray.length * BYTES_PER_FLOAT
         ).order(ByteOrder.nativeOrder()).asFloatBuffer();
         texCoords.put(texCoordArray);
 
@@ -76,7 +91,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             3, 2, 1
         };
         indices = ByteBuffer.allocateDirect(
-                indexArray.length * BYTES_PER_INT
+            indexArray.length * BYTES_PER_INT
         ).order(ByteOrder.nativeOrder()).asIntBuffer();
         indices.put(indexArray);
 
@@ -93,24 +108,24 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         GLES30.glGenTextures(textures.length, textures, 0);
         GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0]);
         GLES30.glTexParameteri(
-                GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                GLES30.GL_TEXTURE_MIN_FILTER,
-                GLES30.GL_LINEAR
+            GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+            GLES30.GL_TEXTURE_MIN_FILTER,
+            GLES30.GL_LINEAR
         );
         GLES30.glTexParameteri(
-                GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                GLES30.GL_TEXTURE_MAG_FILTER,
-                GLES30.GL_LINEAR
+            GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+            GLES30.GL_TEXTURE_MAG_FILTER,
+            GLES30.GL_LINEAR
         );
         GLES30.glTexParameteri(
-                GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                GLES30.GL_TEXTURE_WRAP_S,
-                GLES30.GL_CLAMP_TO_EDGE
+            GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+            GLES30.GL_TEXTURE_WRAP_S,
+            GLES30.GL_CLAMP_TO_EDGE
         );
         GLES30.glTexParameteri(
-                GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                GLES30.GL_TEXTURE_WRAP_T,
-                GLES30.GL_CLAMP_TO_EDGE
+            GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+            GLES30.GL_TEXTURE_WRAP_T,
+            GLES30.GL_CLAMP_TO_EDGE
         );
 
         try {
@@ -136,7 +151,6 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
 
         if (dirty) {
             // It seems we can only update texture within a EGL context.
-            Log.d(TAG, "Updating dirty image");
             surfaceTexture.updateTexImage();
             dirty = false;
         }
@@ -178,7 +192,6 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         if (screenWidth != width || screenHeight != height) {
             screenWidth = width;
             screenHeight = height;
-            Log.d(TAG, "Changed screen size to " + screenWidth + "x" + screenHeight);
             updateTexCoords();
         }
     }
@@ -187,7 +200,6 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         if (videoWidth != width || videoHeight != height) {
             videoWidth = width;
             videoHeight = height;
-            Log.d(TAG, "Changed video size to " + videoWidth + "x" + videoHeight);
             createSurfaceTexture();
             updateTexCoords();
         }
@@ -211,6 +223,10 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
     }
 
     private void updateTexCoords() {
+        // TODO: some video recorder save video in wrong resolution, and add a rotation metadata.
+        // Need to detect and rotate them.
+        // e.g. When record 1080x1920 video with a Samsung phone, it saves 1920x1080 in fact.
+        // Like this: https://www.jacoduplessis.co.za/fix-samsung-video/
         float[] texCoordArray = {
             // u, v
             // bottom left
@@ -224,17 +240,13 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         };
         float videoRatio = (float)videoWidth / videoHeight;
         float screenRatio = (float)screenWidth / screenHeight;
-        Log.d(TAG, "Video ratio " + videoRatio);
-        Log.d(TAG, "Screen ratio " + screenRatio);
         if (videoRatio >= screenRatio) {
-            Log.d(TAG, "Cropping X");
             float centerLength = (float)screenWidth / screenHeight * videoHeight;
             float leftEdge = (videoWidth - centerLength) / 2.0f;
             float rightEdge = leftEdge + centerLength;
             texCoordArray[0] = texCoordArray[2] = leftEdge / videoWidth;
             texCoordArray[4] = texCoordArray[6] = rightEdge / videoWidth;
         } else {
-            Log.d(TAG, "Cropping Y");
             float centerLength = (float)screenHeight / screenWidth * videoWidth;
             float topEdge = (videoHeight - centerLength) / 2.0f;
             float bottomEdge = topEdge + centerLength;
@@ -242,7 +254,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             texCoordArray[1] = texCoordArray[5] = bottomEdge / videoHeight;
         }
         texCoords = ByteBuffer.allocateDirect(
-                texCoordArray.length * BYTES_PER_FLOAT
+            texCoordArray.length * BYTES_PER_FLOAT
         ).order(ByteOrder.nativeOrder()).asFloatBuffer();
         texCoords.put(texCoordArray).position(0);
     }

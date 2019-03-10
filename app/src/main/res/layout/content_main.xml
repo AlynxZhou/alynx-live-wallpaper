@@ -8,12 +8,12 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="xyz.alynx.livewallpaper.MainActivity"
     tools:showIn="@layout/activity_main">
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:scrollbars="vertical" />
-
+        android:layoutAnimation="@anim/layout_fall_down"
+        android:scrollbars="vertical"
+        android:scrollbarStyle="outsideOverlay" />
 </RelativeLayout>

@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 
-<vector android:height="24dp" android:viewportHeight="491.86"
-    android:viewportWidth="491.86" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="#FFFFFFFF" android:pathData="M465.167,211.614H280.245V26.691c0,-8.424 -11.439,-26.69 -34.316,-26.69s-34.316,18.267 -34.316,26.69v184.924H26.69C18.267,211.614 0,223.053 0,245.929s18.267,34.316 26.69,34.316h184.924v184.924c0,8.422 11.438,26.69 34.316,26.69s34.316,-18.268 34.316,-26.69V280.245H465.17c8.422,0 26.69,-11.438 26.69,-34.316S473.59,211.614 465.167,211.614z"/>
+<vector android:height="24dp" android:viewportHeight="426.67"
+    android:viewportWidth="426.67" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M153.504,366.839c-8.657,0 -17.323,-3.302 -23.927,-9.911L9.914,237.265c-13.218,-13.218 -13.218,-34.645 0,-47.863c13.218,-13.218 34.645,-13.218 47.863,0l95.727,95.727l215.39,-215.386c13.218,-13.214 34.65,-13.218 47.859,0c13.222,13.218 13.222,34.65 0,47.863L177.436,356.928C170.827,363.533 162.165,366.839 153.504,366.839z"/>
 </vector>
