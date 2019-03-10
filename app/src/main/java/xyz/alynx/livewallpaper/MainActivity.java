@@ -112,20 +112,11 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
             Uri uri = Uri.parse(path);
-            // Check for the freshest uri.
+            // Ask for persistable permission.
             getContentResolver().takePersistableUriPermission(
                 uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
             );
-            WallpaperCard card = new WallpaperCard(
-                name, uri.toString(), WallpaperCard.Type.EXTERNAL, thumbnail
-            );
-            if (strings.length >= 3 && strings[2] != null) {
-                // Check for activate when resume from data file.
-                if (Objects.equals(card.getPath(), strings[2])) {
-                    LWApplication.setActivateWallpaperCard(card);
-                }
-            }
-            return card;
+            return new WallpaperCard(name, uri.toString(), WallpaperCard.Type.EXTERNAL, thumbnail);
         }
 
         @Override
@@ -177,10 +168,10 @@ public class MainActivity extends AppCompatActivity {
         cancelRemoveCardFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (cardAdapter.isRemovable()) {
-                    cardAdapter.setRemovable(false);
-                    hideCancelFab();
-                }
+            if (cardAdapter.isRemovable()) {
+                cardAdapter.setRemovable(false);
+                hideCancelFab();
+            }
             }
         });
     }
@@ -214,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                dialog.cancel();
+            dialog.cancel();
             }
         });
         addDialog = builder.create();
@@ -226,10 +217,10 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("video/*");
-                startActivityForResult(intent, SELECT_REQUEST_CODE);
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("video/*");
+            startActivityForResult(intent, SELECT_REQUEST_CODE);
             }
         });
     }
@@ -297,13 +288,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        WallpaperCard activateWallpaperCard = LWApplication.getActivateWallpaperCard();
+        WallpaperCard currentWallpaperCard = LWApplication.getCurrentWallpaperCard();
         try {
             JSONObject json = new JSONObject();
             json.put("cards", LWApplication.getCardsJSONArray());
-            if (activateWallpaperCard != null) {
-                json.put("activateWallpaperPath", activateWallpaperCard.getPath());
-            }
             FileOutputStream fos = openFileOutput(LWApplication.JSON_FILE_NAME, Context.MODE_PRIVATE);
             fos.write(json.toString(2).getBytes());
             fos.close();
@@ -332,19 +320,6 @@ public class MainActivity extends AppCompatActivity {
             String jsonSource = stringBuilder.toString();
             JSONObject json = new JSONObject(jsonSource);
             JSONArray cardsArray = json.getJSONArray("cards");
-            String activateWallpaperPath = json.getString("activateWallpaperPath");
-            // If already an activateCard, don't reload from data.
-            if (LWApplication.getActivateWallpaperCard() != null ||
-                activateWallpaperPath.length() == 0) {
-                activateWallpaperPath = null;
-            }
-            if (activateWallpaperPath != null) {
-                for (WallpaperCard card : cards) {
-                    if (Objects.equals(card.getPath(), activateWallpaperPath)) {
-                        LWApplication.setActivateWallpaperCard(card);
-                    }
-                }
-            }
             for (int i = 0; i < cardsArray.length(); ++i) {
                 String name = cardsArray.getJSONObject(i).getString("name");
                 String path = cardsArray.getJSONObject(i).getString("path");
@@ -356,9 +331,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 if (!found) {
-                    // Because task is async, we cannot check active outside task.
-                    // So check inside.
-                    new AddCardTask().execute(name, path, activateWallpaperPath);
+                    new AddCardTask().execute(name, path);
                 }
             }
             bufferedReader.close();

@@ -30,6 +30,14 @@ import java.io.InputStreamReader;
 public class Utils {
     private final static String TAG = "Utils";
 
+    /**
+     * createVideoThumbnailFromUri
+     * @param context
+     * @param uri
+     * @return Bitmap thumbnail
+     *
+     * Hacked from ThumbnailUtils.createVideoThumbnail()'s code.
+     */
     public static Bitmap createVideoThumbnailFromUri(Context context, Uri uri) {
         Bitmap bitmap = null;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();

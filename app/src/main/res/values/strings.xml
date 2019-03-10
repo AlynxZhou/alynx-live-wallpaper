@@ -24,4 +24,6 @@
     <string name="app_link">Project homepage: https://livewallpaper.alynx.xyz/</string>
     <string name="app_version">Version %s</string>
     <string name="empty_name_or_path">Cannot add wallpaper with empty name or path</string>
+    <string name="invalid_path">Wallpaper path invalid, loading default…</string>
+    <string name="default_failed">Loading default wallpaper failed! Please set manually.</string>
 </resources>

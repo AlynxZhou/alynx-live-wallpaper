@@ -17,34 +17,47 @@
 package xyz.alynx.livewallpaper;
 
 import android.app.ActivityManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
 import android.content.res.AssetFileDescriptor;
-import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
-import android.os.AsyncTask;
+import android.os.ParcelFileDescriptor;
 import android.service.wallpaper.WallpaperService;
 import android.view.SurfaceHolder;
+import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ *
+ * Generally, WallpaperService should not depend other parts of app.
+ * Because sometimes (like phone restarted) service starts before Activity and Application.
+ * So we cannot get data from them.
+ *
+ * To solve this, it's better to store WallpaperCard
+ * into storage, SharedPreferences is better than JSON because it's easier to get data.
+ *
+ * So when we cannot get current WallpaperCard from LWApplication, we read SharedPreference,
+ * then build a temp WallpaperCard (in fact only type and path matter for service, so we can
+ * set thumbnail to null).
+ *
+ * And when we get a current WallpaperCard, we save it to SharedPreference for further loading.
+ *
+ */
 public class GLWallpaperService extends WallpaperService {
     private final static String TAG = "GLWallpaperService";
     protected class GLWallpaperEngine extends Engine {
         private final static String TAG = "GLWallpaperEngine";
+        private final static String PREF_NAME = "currentWallpaperCard";
         private Context context = null;
         private GLWallpaperSurfaceView glSurfaceView = null;
         private MediaPlayer mediaPlayer = null;
@@ -58,72 +71,18 @@ public class GLWallpaperService extends WallpaperService {
                 super(context);
             }
 
+            /**
+             * This is a hack. Because Android Live Wallpaper only has a Surface.
+             * So we create a GLSurfaceView, and when drawing to its Surface,
+             * we replace it with WallpaperEngine's Surface.
+             */
             @Override
             public SurfaceHolder getHolder() {
-                // This is a hack. Because Android Live Wallpaper only has a Surface.
-                // So we create a GLSurfaceView, and when drawing to its Surface,
-                // we replace it with WallpaperEngine's Surface.
                 return getSurfaceHolder();
             }
 
             public void onDestroy() {
                 super.onDetachedFromWindow();
-            }
-        }
-
-        private class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-            }
-
-            @Override
-            protected WallpaperCard doInBackground(String... strings) {
-                List<WallpaperCard> cards = LWApplication.getCards();
-                String name = strings[0];
-                if (name.length() > 30) {
-                    name = name.substring(0, 30);
-                }
-                String path = strings[1];
-                for (WallpaperCard card : cards) {
-                    if (Objects.equals(card.getPath(), path)) {
-                        cancel(true);
-                        return null;
-                    }
-                }
-                Bitmap thumbnail = Utils.createVideoThumbnailFromUri(
-                    getApplicationContext(),
-                    Uri.parse(path)
-                );
-                if (thumbnail == null) {
-                    cancel(true);
-                    return null;
-                }
-                Uri uri = Uri.parse(path);
-                // Check for the freshest uri.
-                getContentResolver().takePersistableUriPermission(
-                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
-                );
-                WallpaperCard card = new WallpaperCard(
-                    name, uri.toString(), WallpaperCard.Type.EXTERNAL, thumbnail
-                );
-                if (strings.length >= 3 && strings[2] != null) {
-                    // Check for activate when resume from data file.
-                    if (Objects.equals(card.getPath(), strings[2])) {
-                        LWApplication.setActivateWallpaperCard(card);
-                    }
-                }
-                return card;
-            }
-
-            @Override
-            protected void onCancelled() {
-                super.onCancelled();
-            }
-
-            @Override
-            protected void onPostExecute(WallpaperCard card) {
-                LWApplication.getCards().add(card);
             }
         }
 
@@ -134,63 +93,6 @@ public class GLWallpaperService extends WallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
-            List<WallpaperCard> cards = LWApplication.getCards();
-            // If service starts before MainActivity (system restarted?), maybe this help.
-            if (cards.size() == 1) {
-                try {
-                    FileInputStream fis = openFileInput(LWApplication.JSON_FILE_NAME);
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fis));
-                    String line = null;
-                    StringBuilder stringBuilder = new StringBuilder();
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line);
-                        stringBuilder.append('\n');
-                    }
-                    String jsonSource = stringBuilder.toString();
-                    JSONObject json = new JSONObject(jsonSource);
-                    JSONArray cardsArray = json.getJSONArray("cards");
-                    String activateWallpaperPath = json.getString("activateWallpaperPath");
-                    // If already an activateCard, don't reload from data.
-                    if (LWApplication.getActivateWallpaperCard() != null ||
-                        activateWallpaperPath.length() == 0) {
-                        activateWallpaperPath = null;
-                    }
-                    if (activateWallpaperPath != null) {
-                        for (WallpaperCard card : cards) {
-                            if (Objects.equals(card.getPath(), activateWallpaperPath)) {
-                                LWApplication.setActivateWallpaperCard(card);
-                            }
-                        }
-                    }
-                    for (int i = 0; i < cardsArray.length(); ++i) {
-                        String name = cardsArray.getJSONObject(i).getString("name");
-                        String path = cardsArray.getJSONObject(i).getString("path");
-                        boolean found = false;
-                        for (WallpaperCard card : cards) {
-                            if (Objects.equals(card.getPath(), path)) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            // Because task is async, we cannot check active outside task.
-                            // So check inside.
-                            new AddCardTask().execute(name, path, activateWallpaperPath);
-                        }
-                    }
-                    if (LWApplication.getActivateWallpaperCard() == null) {
-                        LWApplication.setActivateWallpaperCard(LWApplication.getCards().get(0));
-                    }
-                    bufferedReader.close();
-                    fis.close();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         @Override
@@ -255,19 +157,84 @@ public class GLWallpaperService extends WallpaperService {
             return glSurfaceView;
         }
 
+        private void checkWallpaperCardValid() {
+            if (wallpaperCard.getType() == WallpaperCard.Type.INTERNAL) {
+                return;
+            }
+            ContentResolver resolver = getContentResolver();
+            ParcelFileDescriptor pfd = null;
+            try {
+                pfd = resolver.openFileDescriptor(Uri.parse(wallpaperCard.getPath()), "r");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            if (pfd == null) {
+                // File is removed by user.
+                Toast.makeText(context, R.string.invalid_path, Toast.LENGTH_LONG).show();
+                wallpaperCard.setInvalid();
+                // Load default wallpaper.
+                List<WallpaperCard> cards = LWApplication.getCards();
+                if (cards != null && cards.size() > 0) {
+                    wallpaperCard = cards.get(0);
+                } else {
+                    wallpaperCard = null;
+                    Toast.makeText(context, R.string.default_failed, Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+
+        private void loadWallpaperCard() {
+            oldWallpaperCard = wallpaperCard;
+            wallpaperCard = LWApplication.getCurrentWallpaperCard();
+            // If no current card, means that services started and application not start.
+            // Read preference and build a temp card.
+            SharedPreferences pref = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+            if (wallpaperCard == null) {
+                WallpaperCard.Type type = WallpaperCard.Type.EXTERNAL;
+                if (Objects.equals(pref.getString("type", null), "INTERNAL")) {
+                    type = WallpaperCard.Type.INTERNAL;
+                }
+                wallpaperCard = new WallpaperCard(
+                    pref.getString("name", null),
+                    pref.getString("path", null),
+                    type, null
+                );
+                LWApplication.setCurrentWallpaperCard(wallpaperCard);
+            }
+            checkWallpaperCardValid();
+            // Save to preference.
+            SharedPreferences.Editor prefEditor = pref.edit();
+            prefEditor.putString("name", wallpaperCard.getName());
+            prefEditor.putString("path", wallpaperCard.getPath());
+            switch (wallpaperCard.getType()) {
+            case INTERNAL:
+                prefEditor.putString("type",  "INTERNAL");
+                break;
+            case EXTERNAL:
+                prefEditor.putString("type", "EXTERNAL");
+                break;
+            }
+            prefEditor.apply();
+        }
+
         private void startPlayer() {
             if (mediaPlayer != null) {
                 stopPlayer();
             }
-            oldWallpaperCard = wallpaperCard;
-            wallpaperCard = LWApplication.getActivateWallpaperCard();
-            if (wallpaperCard == null) {
-                return;
-            }
+            loadWallpaperCard();
             mediaPlayer = new MediaPlayer();
             renderer.setSourceMediaPlayer(mediaPlayer);
             mediaPlayer.setLooping(true);
             mediaPlayer.setVolume(0.0f, 0.0f);
+            mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                @Override
+                public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+                    // Typically file removing, just restart, engine will check wallpaper path.
+                    stopPlayer();
+                    startPlayer();
+                    return true;
+                }
+            });
             mediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
                 @Override
                 public void onVideoSizeChanged(MediaPlayer mediaPlayer, int width, int height) {
@@ -282,7 +249,7 @@ public class GLWallpaperService extends WallpaperService {
                         mediaPlayer.getVideoHeight()
                     );
                     if (oldWallpaperCard != null &&
-                        Objects.equals(oldWallpaperCard.getPath(), wallpaperCard.getPath())) {
+                        oldWallpaperCard.equals(wallpaperCard)) {
                         mediaPlayer.seekTo(progress);
                     } else {
                         mediaPlayer.seekTo(0);

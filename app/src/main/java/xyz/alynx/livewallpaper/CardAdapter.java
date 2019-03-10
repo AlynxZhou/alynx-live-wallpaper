@@ -58,6 +58,10 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull final CardViewHolder cardViewHolder, int i) {
         WallpaperCard card = cards.get(cardViewHolder.getLayoutPosition());
+        if (!card.isValid()) {
+            removeCard(cardViewHolder.getLayoutPosition());
+            return;
+        }
         cardViewHolder.name.setText(card.getName());
         cardViewHolder.path.setText(card.getPath());
         if (card.getType() == WallpaperCard.Type.INTERNAL) {
@@ -66,7 +70,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
             cardViewHolder.internal.setVisibility(View.GONE);
         }
         cardViewHolder.thumbnail.setImageBitmap(card.getThumbnail());
-        if (removable && card.isRemovable()) {
+        if (removable && card.isRemovable() && !card.isCurrent()) {
             cardViewHolder.removeButton.setVisibility(View.VISIBLE);
         } else {
             cardViewHolder.removeButton.setVisibility(View.GONE);
@@ -74,22 +78,22 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
         cardViewHolder.removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                removeCard(cardViewHolder.getLayoutPosition());
+            removeCard(cardViewHolder.getLayoutPosition());
             }
         });
         cardViewHolder.thumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                List<WallpaperCard> cards = LWApplication.getCards();
-                LWApplication.setActivateWallpaperCard(
-                    cards.get(cardViewHolder.getLayoutPosition())
-                );
-                Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
-                intent.putExtra(
-                    WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                    new ComponentName(view.getContext(), GLWallpaperService.class)
-                );
-                view.getContext().startActivity(intent);
+            List<WallpaperCard> cards = LWApplication.getCards();
+            LWApplication.setCurrentWallpaperCard(
+                cards.get(cardViewHolder.getLayoutPosition())
+            );
+            Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+            intent.putExtra(
+                WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                new ComponentName(view.getContext(), GLWallpaperService.class)
+            );
+            view.getContext().startActivity(intent);
             }
         });
     }
@@ -107,8 +111,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
     public void removeCard(int position) {
         notifyItemRemoved(position);
         context.getContentResolver().releasePersistableUriPermission(
-                Uri.parse(cards.get(position).getPath()),
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            Uri.parse(cards.get(position).getPath()),
+            Intent.FLAG_GRANT_READ_URI_PERMISSION
         );
         cards.remove(position);
     }

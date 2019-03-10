@@ -30,7 +30,7 @@ import java.util.List;
 public class LWApplication extends Application {
     private final static String TAG = "LWApplication";
     private static List<WallpaperCard> cards = null;
-    private static WallpaperCard activateWallpaperCard = null;
+    private static WallpaperCard currentWallpaperCard = null;
     public final static String JSON_FILE_NAME = "data.json";
 
     @Override
@@ -56,17 +56,18 @@ public class LWApplication extends Application {
         return cards;
     }
 
-    public static WallpaperCard getActivateWallpaperCard() {
-        return activateWallpaperCard;
+    public static WallpaperCard getCurrentWallpaperCard() {
+        return currentWallpaperCard;
     }
 
-    public static void setActivateWallpaperCard(WallpaperCard wallpaperCard) {
-        activateWallpaperCard = wallpaperCard;
+    public static void setCurrentWallpaperCard(WallpaperCard wallpaperCard) {
+        currentWallpaperCard = wallpaperCard;
     }
 
     public static JSONArray getCardsJSONArray() throws JSONException {
         JSONArray jsonArray = new JSONArray();
         for (WallpaperCard card : cards) {
+            // INTERNAL WallpaperCard don't need to save.
             if (card.getType() != WallpaperCard.Type.INTERNAL) {
                 jsonArray.put(card.toJSON());
             }
