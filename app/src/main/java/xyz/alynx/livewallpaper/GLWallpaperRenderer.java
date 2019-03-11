@@ -252,11 +252,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f
         };
-        // Some video recorder save video frames in direction differs from recoring,
-        // and add a rotation metadata. Need to detect and rotate them before we scaling.
-        if (videoRotation % 360 != 0) {
-            Matrix.rotateM(model, 0, -videoRotation, 0,0, 1);
-        }
+        // OpenGL model matrix: scaling, rotating, translating.
         float videoRatio = (float)videoWidth / videoHeight;
         float screenRatio = (float)screenWidth / screenHeight;
         if (videoRatio >= screenRatio) {
@@ -272,6 +268,11 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
                 model, 0, 1,
                 ((float)videoHeight / videoWidth) / ((float)screenHeight / screenWidth), 1
             );
+        }
+        // Some video recorder save video frames in direction differs from recoring,
+        // and add a rotation metadata. Need to detect and rotate them.
+        if (videoRotation % 360 != 0) {
+            Matrix.rotateM(model, 0, -videoRotation, 0,0, 1);
         }
         // This is a 2D center crop, so we only need model matrix, no view and projection.
         mvp = ByteBuffer.allocateDirect(
