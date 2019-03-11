@@ -20,7 +20,6 @@ import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -78,22 +77,22 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
         cardViewHolder.removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-            removeCard(cardViewHolder.getLayoutPosition());
+                removeCard(cardViewHolder.getLayoutPosition());
             }
         });
         cardViewHolder.thumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-            List<WallpaperCard> cards = LWApplication.getCards();
-            LWApplication.setCurrentWallpaperCard(
-                cards.get(cardViewHolder.getLayoutPosition())
-            );
-            Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
-            intent.putExtra(
-                WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                new ComponentName(view.getContext(), GLWallpaperService.class)
-            );
-            view.getContext().startActivity(intent);
+                List<WallpaperCard> cards = LWApplication.getCards();
+                LWApplication.setCurrentWallpaperCard(
+                    cards.get(cardViewHolder.getLayoutPosition())
+                );
+                Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+                intent.putExtra(
+                    WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                    new ComponentName(view.getContext(), GLWallpaperService.class)
+                );
+                view.getContext().startActivity(intent);
             }
         });
     }
@@ -111,7 +110,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
     public void removeCard(int position) {
         notifyItemRemoved(position);
         context.getContentResolver().releasePersistableUriPermission(
-            Uri.parse(cards.get(position).getPath()),
+            cards.get(position).getUri(),
             Intent.FLAG_GRANT_READ_URI_PERMISSION
         );
         cards.remove(position);

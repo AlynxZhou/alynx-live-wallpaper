@@ -31,7 +31,6 @@ import android.service.wallpaper.WallpaperService;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
-import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
@@ -164,7 +163,7 @@ public class GLWallpaperService extends WallpaperService {
             ContentResolver resolver = getContentResolver();
             ParcelFileDescriptor pfd = null;
             try {
-                pfd = resolver.openFileDescriptor(Uri.parse(wallpaperCard.getPath()), "r");
+                pfd = resolver.openFileDescriptor(wallpaperCard.getUri(), "r");
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -191,13 +190,17 @@ public class GLWallpaperService extends WallpaperService {
             SharedPreferences pref = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
             if (wallpaperCard == null) {
                 WallpaperCard.Type type = WallpaperCard.Type.EXTERNAL;
+                Uri uri = null;
                 if (Objects.equals(pref.getString("type", null), "INTERNAL")) {
                     type = WallpaperCard.Type.INTERNAL;
+                    uri = Uri.parse("file:///android_asset/" + pref.getString("path", null));
+                } else {
+                    uri = Uri.parse(pref.getString("path", null));
                 }
                 wallpaperCard = new WallpaperCard(
                     pref.getString("name", null),
                     pref.getString("path", null),
-                    type, null
+                    uri, type, null
                 );
                 LWApplication.setCurrentWallpaperCard(wallpaperCard);
             }
@@ -231,7 +234,7 @@ public class GLWallpaperService extends WallpaperService {
                     afd.close();
                     break;
                 case EXTERNAL:
-                    mmr.setDataSource(context, Uri.parse(wallpaperCard.getPath()));
+                    mmr.setDataSource(context, wallpaperCard.getUri());
                     break;
                 }
             } catch (IOException e) {
@@ -309,7 +312,7 @@ public class GLWallpaperService extends WallpaperService {
                     afd.close();
                     break;
                 case EXTERNAL:
-                    mediaPlayer.setDataSource(context, Uri.parse(wallpaperCard.getPath()));
+                    mediaPlayer.setDataSource(context, wallpaperCard.getUri());
                     break;
                 }
                 // This must be called after data source is set.
@@ -328,8 +331,8 @@ public class GLWallpaperService extends WallpaperService {
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
                     progress = mediaPlayer.getCurrentPosition();
+                    mediaPlayer.stop();
                 }
-                mediaPlayer.stop();
                 mediaPlayer.reset();
                 mediaPlayer.release();
                 mediaPlayer = null;

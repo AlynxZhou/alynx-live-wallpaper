@@ -17,6 +17,7 @@
 package xyz.alynx.livewallpaper;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,13 +39,15 @@ public class WallpaperCard {
     // It's hard to access file path with Android built-in file chooser.
     // So actually path is a path.
     private String path = null;
+    private Uri uri = null;
     private Bitmap thumbnail = null;
     private boolean valid = true;
     private Type type = Type.EXTERNAL;
 
-    public WallpaperCard(String name, String path, Type type, Bitmap thumbnail) {
+    public WallpaperCard(String name, String path, Uri uri, Type type, Bitmap thumbnail) {
         setName(name);
         setPath(path);
+        setUri(uri);
         this.type = type;
         this.thumbnail = thumbnail;
     }
@@ -63,6 +66,14 @@ public class WallpaperCard {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public Uri getUri() {
+        return uri;
+    }
+
+    public void setUri(Uri uri) {
+        this.uri = uri;
     }
 
     public Bitmap getThumbnail() {

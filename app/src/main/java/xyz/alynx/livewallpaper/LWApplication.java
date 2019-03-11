@@ -19,6 +19,7 @@ package xyz.alynx.livewallpaper;
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,9 +30,9 @@ import java.util.List;
 
 public class LWApplication extends Application {
     private final static String TAG = "LWApplication";
+    public final static String JSON_FILE_NAME = "data.json";
     private static List<WallpaperCard> cards = null;
     private static WallpaperCard currentWallpaperCard = null;
-    public final static String JSON_FILE_NAME = "data.json";
 
     @Override
     public void onCreate() {
@@ -46,9 +47,10 @@ public class LWApplication extends Application {
             e.printStackTrace();
         }
         cards.add(new WallpaperCard(
-            getApplicationContext().getResources().getString(R.string.saber_sandwich),
-            "wallpapers/saber-sandwich/saber-sandwich-1080x1080.mp4",
-            WallpaperCard.Type.INTERNAL, thumbnail
+            getApplicationContext().getResources().getString(R.string.saber_sandwich), "wallpapers/saber-sandwich/saber-sandwich-1080x1080.mp4",
+            Uri.parse(
+                "file:///android_asset/wallpapers/saber-sandwich/saber-sandwich-1080x1080.mp4"
+            ), WallpaperCard.Type.INTERNAL, thumbnail
         ));
     }
 
