@@ -3,4 +3,4 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:thumbnail="@drawable/ic_icon"
     android:description="@string/wallpaper_description"
-    android:settingsActivity="xyz.alynx.LiveWallpaper.MainActivity" />
+    android:settingsActivity="xyz.alynx.livewallpaper.MainActivity" />
