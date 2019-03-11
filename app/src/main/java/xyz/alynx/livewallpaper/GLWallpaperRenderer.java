@@ -24,7 +24,6 @@ import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.view.Surface;
-import android.widget.Toast;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -151,6 +150,18 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             GLES30.GL_CLAMP_TO_EDGE
         );
 
+        // Position is set in shader sources.
+        GLES30.glVertexAttribPointer(
+            0, 2, GLES30.GL_FLOAT,
+            false, 0, vertices
+        );
+        GLES30.glVertexAttribPointer(
+            1, 2, GLES30.GL_FLOAT,
+            false, 0, texCoords
+        );
+        GLES30.glEnableVertexAttribArray(0);
+        GLES30.glEnableVertexAttribArray(1);
+
         try{
             program = Utils.linkProgram(
                 Utils.compileShaderResource(context, GLES30.GL_VERTEX_SHADER, R.raw.vertex),
@@ -159,7 +170,6 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             mvpLocation = GLES30.glGetUniformLocation(program, "mvp");
         } catch (RuntimeException e) {
             e.printStackTrace();
-            Toast.makeText(context, R.string.gl_runtime_error, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -183,23 +193,9 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT);
 
-        GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0]);
         GLES30.glUseProgram(program);
-        // Position is set in shader sources.
-        GLES30.glVertexAttribPointer(
-            0, 2, GLES30.GL_FLOAT,
-            false, 0, vertices
-        );
-        GLES30.glVertexAttribPointer(
-            1, 2, GLES30.GL_FLOAT,
-            false, 0, texCoords
-        );
-        GLES30.glEnableVertexAttribArray(0);
-        GLES30.glEnableVertexAttribArray(1);
         GLES30.glUniformMatrix4fv(mvpLocation, 1, false, mvp);
         GLES30.glDrawElements(GLES30.GL_TRIANGLES, 6, GLES30.GL_UNSIGNED_INT, indices);
-        GLES30.glDisableVertexAttribArray(0);
-        GLES30.glDisableVertexAttribArray(1);
     }
 
     public void setSourceMediaPlayer(MediaPlayer mediaPlayer) {
