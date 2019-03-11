@@ -22,6 +22,7 @@ import android.media.MediaPlayer;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 import android.view.Surface;
 
 import java.nio.ByteBuffer;
@@ -39,7 +40,9 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
     private FloatBuffer vertices = null;
     private FloatBuffer texCoords = null;
     private IntBuffer indices = null;
+    private FloatBuffer mvp = null;
     private int program = 0;
+    private int mvpLocation = 0;
     private int[] textures = null;
     private SurfaceTexture surfaceTexture = null;
     private int screenWidth = 0;
@@ -96,13 +99,31 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         indices.put(indexArray);
 
         textures = new int[1];
+
+        float[] mvpArray = {
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
+        };
+        mvp = ByteBuffer.allocateDirect(
+            mvpArray.length * BYTES_PER_FLOAT
+        ).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mvp.put(mvpArray);
     }
 
     @Override
-    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) throws RuntimeException {
         vertices.position(0);
         texCoords.position(0);
         indices.position(0);
+        mvp.position(0);
+
+        // No depth test for 2D video.
+        GLES30.glDisable(GLES30.GL_DEPTH_TEST);
+        GLES30.glDepthMask(false);
+        GLES30.glDisable(GLES30.GL_CULL_FACE);
+        GLES30.glDisable(GLES30.GL_BLEND);
 
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
         GLES30.glGenTextures(textures.length, textures, 0);
@@ -128,14 +149,11 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             GLES30.GL_CLAMP_TO_EDGE
         );
 
-        try {
-            program = Utils.linkProgram(
-                Utils.compileShaderResource(context, GLES30.GL_VERTEX_SHADER, R.raw.vertex),
-                Utils.compileShaderResource(context, GLES30.GL_FRAGMENT_SHADER, R.raw.fragment)
-            );
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-        }
+        program = Utils.linkProgram(
+            Utils.compileShaderResource(context, GLES30.GL_VERTEX_SHADER, R.raw.vertex),
+            Utils.compileShaderResource(context, GLES30.GL_FRAGMENT_SHADER, R.raw.fragment)
+        );
+        mvpLocation = GLES30.glGetUniformLocation(program, "mvp");
     }
 
     @Override
@@ -155,12 +173,8 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             dirty = false;
         }
 
-        // No depth test for 2D video.
-        GLES30.glDisable(GLES30.GL_DEPTH_TEST);
-        GLES30.glDepthMask(false);
-
         GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT);
 
         GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0]);
         GLES30.glUseProgram(program);
@@ -175,12 +189,11 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         );
         GLES30.glEnableVertexAttribArray(0);
         GLES30.glEnableVertexAttribArray(1);
+        GLES30.glUniformMatrix4fv(mvpLocation, 1, false, mvp);
         GLES30.glDrawElements(GLES30.GL_TRIANGLES, 6, GLES30.GL_UNSIGNED_INT, indices);
         GLES30.glDisableVertexAttribArray(0);
         GLES30.glDisableVertexAttribArray(1);
 
-        GLES30.glDepthMask(true);
-        GLES30.glEnable(GLES30.GL_DEPTH_TEST);
     }
 
     public void setSourceMediaPlayer(MediaPlayer mediaPlayer) {
@@ -192,7 +205,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         if (screenWidth != width || screenHeight != height) {
             screenWidth = width;
             screenHeight = height;
-            updateTexCoords();
+            updateMatrix();
         }
     }
 
@@ -201,7 +214,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             videoWidth = width;
             videoHeight = height;
             createSurfaceTexture();
-            updateTexCoords();
+            updateMatrix();
         }
     }
 
@@ -222,40 +235,36 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    private void updateTexCoords() {
+    private void updateMatrix() {
         // TODO: some video recorder save video in wrong resolution, and add a rotation metadata.
         // Need to detect and rotate them.
         // e.g. When record 1080x1920 video with a Samsung phone, it saves 1920x1080 in fact.
         // Like this: https://www.jacoduplessis.co.za/fix-samsung-video/
-        float[] texCoordArray = {
-            // u, v
-            // bottom left
-            0.0f, 1.0f,
-            // top left
-            0.0f, 0.0f,
-            // bottom right
-            1.0f, 1.0f,
-            // top right
-            1.0f, 0.0f
-        };
+        float[] model = {
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
+        };;
         float videoRatio = (float)videoWidth / videoHeight;
         float screenRatio = (float)screenWidth / screenHeight;
         if (videoRatio >= screenRatio) {
-            float centerLength = (float)screenWidth / screenHeight * videoHeight;
-            float leftEdge = (videoWidth - centerLength) / 2.0f;
-            float rightEdge = leftEdge + centerLength;
-            texCoordArray[0] = texCoordArray[2] = leftEdge / videoWidth;
-            texCoordArray[4] = texCoordArray[6] = rightEdge / videoWidth;
+            // Treat video and screen width as 1, and compare width to scale.
+            Matrix.scaleM(
+                model, 0,
+                ((float)videoWidth / videoHeight) / ((float)screenWidth / screenHeight),
+                1, 1
+            );
         } else {
-            float centerLength = (float)screenHeight / screenWidth * videoWidth;
-            float topEdge = (videoHeight - centerLength) / 2.0f;
-            float bottomEdge = topEdge + centerLength;
-            texCoordArray[3] = texCoordArray[7] = topEdge / videoHeight;
-            texCoordArray[1] = texCoordArray[5] = bottomEdge / videoHeight;
+            // Treat video and screen height as 1, and compare height to scale.
+            Matrix.scaleM(
+                model, 0, 1,
+                ((float)videoHeight / videoWidth) / ((float)screenHeight / screenWidth), 1
+            );
         }
-        texCoords = ByteBuffer.allocateDirect(
-            texCoordArray.length * BYTES_PER_FLOAT
+        mvp = ByteBuffer.allocateDirect(
+            model.length * BYTES_PER_FLOAT
         ).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        texCoords.put(texCoordArray).position(0);
+        mvp.put(model).position(0);
     }
 }
