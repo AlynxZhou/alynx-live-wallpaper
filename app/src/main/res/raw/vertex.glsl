@@ -1,3 +1,7 @@
+#version 300 es
+
+// Some Android phone driver needs to put pre-processor in the first line. (e.g. Huawei Kirin)
+
 /**
  * Copyright 2019 Alynx Zhou
  *
@@ -13,8 +17,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#version 300 es
 
 layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_tex_coord;

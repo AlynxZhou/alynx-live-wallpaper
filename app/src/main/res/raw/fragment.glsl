@@ -1,3 +1,9 @@
+#version 300 es
+#extension GL_OES_EGL_image_external_essl3 : require
+#extension GL_OES_EGL_image_external : require
+
+// Some Android phone driver needs to put pre-processor in the first line. (e.g. Huawei Kirin)
+
 /**
  * Copyright 2019 Alynx Zhou
  *
@@ -14,17 +20,13 @@
  * limitations under the License.
  */
 
-#version 300 es
-#extension GL_OES_EGL_image_external : require
-#extension GL_OES_EGL_image_external_essl3 : require
-
 precision mediump float;
 
-uniform samplerExternalOES texture;
+uniform samplerExternalOES frame;
 
 in vec2 tex_coord;
 out vec4 frag_color;
 
 void main() {
-    frag_color = texture(texture, tex_coord);
+    frag_color = texture(frame, tex_coord);
 }
