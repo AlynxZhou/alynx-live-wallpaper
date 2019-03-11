@@ -26,4 +26,5 @@
     <string name="empty_name_or_path">Cannot add wallpaper with empty name or path</string>
     <string name="invalid_path">Wallpaper path invalid, loading default…</string>
     <string name="default_failed">Loading default wallpaper failed! Please set manually.</string>
+    <string name="gl_runtime_error">OpenGL runtime error detected</string>
 </resources>

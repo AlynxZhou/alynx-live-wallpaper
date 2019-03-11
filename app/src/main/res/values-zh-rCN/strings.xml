@@ -26,4 +26,5 @@
     <string name="empty_name_or_path">无法添加名称或路径为空的壁纸</string>
     <string name="invalid_path">壁纸路径无效，加载默认值……</string>
     <string name="default_failed">加载默认壁纸失败！请手动设置。</string>
+    <string name="gl_runtime_error">检测到 OpenGL 运行时错误</string>
 </resources>
