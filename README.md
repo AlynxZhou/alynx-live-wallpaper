@@ -6,8 +6,6 @@ A android app that allows you choose a video as wallpaper.
 
 **Need GLESv3 support for cropping video size.**
 
-Currently under developing.
-
 # Icons
 
 Some icons are from following links, thanks to authors.
