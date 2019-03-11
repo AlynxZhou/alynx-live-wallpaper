@@ -16,17 +16,22 @@
 
 package xyz.alynx.livewallpaper;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -57,13 +62,14 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private final static String TAG = "MainActivity";
+    public static final int SELECT_REQUEST_CODE = 3;
+    private static final int EXTERNAL_STORAGE_REQUEST_CODE = 7;
     private RecyclerView recyclerView = null;
     private CardAdapter cardAdapter = null;
     private AlertDialog addDialog = null;
     private LayoutInflater layoutInflater = null;
     private FloatingActionButton addCardFab = null;
     private FloatingActionButton cancelRemoveCardFab = null;
-    public static final int SELECT_REQUEST_CODE = 3;
 
     private class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
         @Override
@@ -98,10 +104,18 @@ public class MainActivity extends AppCompatActivity {
                     return null;
                 }
             }
-            Bitmap thumbnail = Utils.createVideoThumbnailFromUri(
-                getApplicationContext(),
-                Uri.parse(path)
-            );
+            Uri uri = Uri.parse(path);
+            try {
+                // Ask for persistable permission.
+                getContentResolver().takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                );
+            } catch (SecurityException e) {
+                e.printStackTrace();
+                cancel(true);
+                return null;
+            }
+            Bitmap thumbnail = Utils.createVideoThumbnailFromUri(getApplicationContext(), uri);
             if (thumbnail == null) {
                 Snackbar.make(
                     findViewById(R.id.coordinator_layout),
@@ -111,12 +125,9 @@ public class MainActivity extends AppCompatActivity {
                 cancel(true);
                 return null;
             }
-            Uri uri = Uri.parse(path);
-            // Ask for persistable permission.
-            getContentResolver().takePersistableUriPermission(
-                uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+            return new WallpaperCard(
+                name, uri.toString(), uri, WallpaperCard.Type.EXTERNAL, thumbnail
             );
-            return new WallpaperCard(name, uri.toString(), WallpaperCard.Type.EXTERNAL, thumbnail);
         }
 
         @Override
@@ -168,84 +179,17 @@ public class MainActivity extends AppCompatActivity {
         cancelRemoveCardFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-            if (cardAdapter.isRemovable()) {
-                cardAdapter.setRemovable(false);
-                hideCancelFab();
-            }
-            }
-        });
-    }
-
-    private void showCancelFab() {
-        Animation scaleDown = AnimationUtils.loadAnimation(this, R.anim.scale_down);
-        addCardFab.startAnimation(scaleDown);
-        addCardFab.setVisibility(View.GONE);
-        cancelRemoveCardFab.setVisibility(View.VISIBLE);
-        Animation scaleUp = AnimationUtils.loadAnimation(this, R.anim.scale_up);
-        cancelRemoveCardFab.startAnimation(scaleUp);
-    }
-
-    private void hideCancelFab() {
-        Animation scaleDown = AnimationUtils.loadAnimation(this, R.anim.scale_down);
-        cancelRemoveCardFab.startAnimation(scaleDown);
-        cancelRemoveCardFab.setVisibility(View.GONE);
-        addCardFab.setVisibility(View.VISIBLE);
-        Animation scaleUp = AnimationUtils.loadAnimation(this, R.anim.scale_up);
-        addCardFab.startAnimation(scaleUp);
-    }
-
-    private void createAddDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.add_wallpaper);
-        builder.setView(layoutInflater.inflate(R.layout.add_wallpaper_dialog, null));
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                addCard();
+                if (cardAdapter.isRemovable()) {
+                    cardAdapter.setRemovable(false);
+                    hideCancelFab();
+                }
             }
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-            dialog.cancel();
-            }
-        });
-        addDialog = builder.create();
-        addDialog.show();
-        Button button = addDialog.findViewById(R.id.choose_file_button);
-        if (button == null) {
-            return;
-        }
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("video/*");
-            startActivityForResult(intent, SELECT_REQUEST_CODE);
-            }
-        });
-    }
-
-    private void addCard() {
-        EditText nameEditText = addDialog.findViewById(R.id.name_edit_text);
-        EditText pathEditText = addDialog.findViewById(R.id.path_edit_text);
-        if (nameEditText == null || pathEditText == null) {
-            return;
-        }
-        String name = nameEditText.getText().toString();
-        String path = pathEditText.getText().toString();
-        if (name.length() == 0 || path.length() == 0) {
-            Snackbar.make(
-                findViewById(R.id.coordinator_layout),
-                R.string.empty_name_or_path,
-                Snackbar.LENGTH_LONG
-            ).show();
-            return;
-        }
-        new AddCardTask().execute(name, path);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
         if (requestCode == SELECT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             Uri uri = null;
             if (resultData != null) {
@@ -259,6 +203,38 @@ public class MainActivity extends AppCompatActivity {
                 }
                 pathEditText.setText(uri.toString());
             }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+        int requestCode,
+        @NonNull String[] permissions,
+        @NonNull int[] grantResults
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+        case EXTERNAL_STORAGE_REQUEST_CODE:
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Snackbar.make(
+                    findViewById(R.id.coordinator_layout),
+                    getResources().getText(R.string.got_read_storage_permission).toString(),
+                    Snackbar.LENGTH_LONG
+                ).show();
+                createAddDialog();
+            } else {
+                Snackbar.make(
+                    findViewById(R.id.coordinator_layout),
+                    getResources().getText(R.string.not_got_read_storage_permission).toString(),
+                    Snackbar.LENGTH_LONG
+                ).show();
+                // Show a dialog to tell user we need permission.
+                createReadStorageDialog();
+            }
+            break;
+        default:
+            break;
         }
     }
 
@@ -343,5 +319,102 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    private void showCancelFab() {
+        Animation scaleDown = AnimationUtils.loadAnimation(this, R.anim.scale_down);
+        addCardFab.startAnimation(scaleDown);
+        addCardFab.setVisibility(View.GONE);
+        cancelRemoveCardFab.setVisibility(View.VISIBLE);
+        Animation scaleUp = AnimationUtils.loadAnimation(this, R.anim.scale_up);
+        cancelRemoveCardFab.startAnimation(scaleUp);
+    }
+
+    private void hideCancelFab() {
+        Animation scaleDown = AnimationUtils.loadAnimation(this, R.anim.scale_down);
+        cancelRemoveCardFab.startAnimation(scaleDown);
+        cancelRemoveCardFab.setVisibility(View.GONE);
+        addCardFab.setVisibility(View.VISIBLE);
+        Animation scaleUp = AnimationUtils.loadAnimation(this, R.anim.scale_up);
+        addCardFab.startAnimation(scaleUp);
+    }
+
+    private void createAddDialog() {
+        if (!checkReadStoragePermissions()) {
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.add_wallpaper);
+        builder.setView(layoutInflater.inflate(R.layout.add_wallpaper_dialog, null));
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                addCard();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+        addDialog = builder.create();
+        addDialog.show();
+        Button button = addDialog.findViewById(R.id.choose_file_button);
+        if (button == null) {
+            return;
+        }
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("video/*");
+                startActivityForResult(intent, SELECT_REQUEST_CODE);
+            }
+        });
+    }
+
+    private void createReadStorageDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.read_storage_title);
+        builder.setMessage(R.string.read_storage_info);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+            }
+        });
+        AlertDialog readStorageDialog = builder.create();
+        readStorageDialog.show();
+    }
+
+    private void addCard() {
+        EditText nameEditText = addDialog.findViewById(R.id.name_edit_text);
+        EditText pathEditText = addDialog.findViewById(R.id.path_edit_text);
+        if (nameEditText == null || pathEditText == null) {
+            return;
+        }
+        String name = nameEditText.getText().toString();
+        String path = pathEditText.getText().toString();
+        if (name.length() == 0 || path.length() == 0) {
+            Snackbar.make(
+                findViewById(R.id.coordinator_layout),
+                R.string.empty_name_or_path,
+                Snackbar.LENGTH_LONG
+            ).show();
+            return;
+        }
+        new AddCardTask().execute(name, path);
+    }
+
+    private boolean checkReadStoragePermissions() {
+        if (ContextCompat.checkSelfPermission(
+            this, Manifest.permission.READ_EXTERNAL_STORAGE
+        ) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                EXTERNAL_STORAGE_REQUEST_CODE
+            );
+            return false;
+        }
+        return true;
     }
 }

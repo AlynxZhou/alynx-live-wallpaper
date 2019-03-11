@@ -26,5 +26,8 @@
     <string name="empty_name_or_path">Cannot add wallpaper with empty name or path</string>
     <string name="invalid_path">Wallpaper path invalid, loading default…</string>
     <string name="default_failed">Loading default wallpaper failed! Please set manually.</string>
-    <string name="gl_runtime_error">OpenGL runtime error detected</string>
+    <string name="read_storage_info">If you want to add videos on you device as wallpapers, you must grant READ_STORAGE permission to this app.\nIt promises that only read video by using system video picker which returns a uri instead of real path, so you won\'t worry about privacy leak.</string>
+    <string name="got_read_storage_permission">Got read storage permission</string>
+    <string name="not_got_read_storage_permission">Failed to get read storage permission and unable to add video wallpapers</string>
+    <string name="read_storage_title">Needs to Read Storage</string>
 </resources>
