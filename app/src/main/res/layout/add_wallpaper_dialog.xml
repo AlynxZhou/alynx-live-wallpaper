@@ -9,13 +9,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/name" />
+
     <EditText
         android:id="@+id/name_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="textPersonName"
-        android:text="@string/enter_wallpaper_name" />
+        android:hint="@string/enter_wallpaper_name"
+        android:inputType="textPersonName" />
     <TextView
         android:id="@+id/path_text_view"
         android:layout_width="match_parent"
