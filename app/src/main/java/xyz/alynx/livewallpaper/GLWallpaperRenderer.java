@@ -24,6 +24,7 @@ import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.view.Surface;
+import android.widget.Toast;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -49,6 +50,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
     private int screenHeight = 0;
     private int videoWidth = 0;
     private int videoHeight = 0;
+    private int videoRotation = 0;
     private boolean dirty = false;
     private final int BYTES_PER_FLOAT = 4;
     private final int BYTES_PER_INT = 4;
@@ -113,7 +115,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
     }
 
     @Override
-    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) throws RuntimeException {
+    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         vertices.position(0);
         texCoords.position(0);
         indices.position(0);
@@ -149,11 +151,16 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             GLES30.GL_CLAMP_TO_EDGE
         );
 
-        program = Utils.linkProgram(
-            Utils.compileShaderResource(context, GLES30.GL_VERTEX_SHADER, R.raw.vertex),
-            Utils.compileShaderResource(context, GLES30.GL_FRAGMENT_SHADER, R.raw.fragment)
-        );
-        mvpLocation = GLES30.glGetUniformLocation(program, "mvp");
+        try{
+            program = Utils.linkProgram(
+                Utils.compileShaderResource(context, GLES30.GL_VERTEX_SHADER, R.raw.vertex),
+                Utils.compileShaderResource(context, GLES30.GL_FRAGMENT_SHADER, R.raw.fragment)
+            );
+            mvpLocation = GLES30.glGetUniformLocation(program, "mvp");
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            Toast.makeText(context, R.string.gl_runtime_error, Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -193,7 +200,6 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         GLES30.glDrawElements(GLES30.GL_TRIANGLES, 6, GLES30.GL_UNSIGNED_INT, indices);
         GLES30.glDisableVertexAttribArray(0);
         GLES30.glDisableVertexAttribArray(1);
-
     }
 
     public void setSourceMediaPlayer(MediaPlayer mediaPlayer) {
@@ -209,7 +215,10 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    public void setVideoSize(int width, int height) {
+    public void setVideoSizeAndRotation(int width, int height, int rotation) {
+        // MediaPlayer already get right width and height, so we don't need to swap them.
+        // Just record the rotation for frame display.
+        videoRotation = rotation;
         if (videoWidth != width || videoHeight != height) {
             videoWidth = width;
             videoHeight = height;
@@ -236,16 +245,18 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
     }
 
     private void updateMatrix() {
-        // TODO: some video recorder save video in wrong resolution, and add a rotation metadata.
-        // Need to detect and rotate them.
-        // e.g. When record 1080x1920 video with a Samsung phone, it saves 1920x1080 in fact.
-        // Like this: https://www.jacoduplessis.co.za/fix-samsung-video/
+        // Start with an identify matrix.
         float[] model = {
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f
-        };;
+        };
+        // Some video recorder save video frames in direction differs from recoring,
+        // and add a rotation metadata. Need to detect and rotate them before we scaling.
+        if (videoRotation % 360 != 0) {
+            Matrix.rotateM(model, 0, -videoRotation, 0,0, 1);
+        }
         float videoRatio = (float)videoWidth / videoHeight;
         float screenRatio = (float)screenWidth / screenHeight;
         if (videoRatio >= screenRatio) {
@@ -262,6 +273,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
                 ((float)videoHeight / videoWidth) / ((float)screenHeight / screenWidth), 1
             );
         }
+        // This is a 2D center crop, so we only need model matrix, no view and projection.
         mvp = ByteBuffer.allocateDirect(
             model.length * BYTES_PER_FLOAT
         ).order(ByteOrder.nativeOrder()).asFloatBuffer();

@@ -19,10 +19,10 @@ package xyz.alynx.livewallpaper;
 import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
 import android.content.res.AssetFileDescriptor;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -217,6 +217,39 @@ public class GLWallpaperService extends WallpaperService {
             prefEditor.apply();
         }
 
+        private int getVideoRotation() {
+            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            try {
+                switch (wallpaperCard.getType()) {
+                case INTERNAL:
+                    AssetFileDescriptor afd = getAssets().openFd(wallpaperCard.getPath());
+                    mmr.setDataSource(
+                        afd.getFileDescriptor(),
+                        afd.getStartOffset(),
+                        afd.getLength()
+                    );
+                    afd.close();
+                    break;
+                case EXTERNAL:
+                    mmr.setDataSource(context, Uri.parse(wallpaperCard.getPath()));
+                    break;
+                }
+            } catch (IOException e) {
+                // Typically file removing, just restart, engine will check wallpaper path.
+                e.printStackTrace();
+                stopPlayer();
+                startPlayer();
+            }
+            String rotation = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
+            mmr.release();
+            try {
+                return Integer.parseInt(rotation);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                return 0;
+            }
+        }
+
         private void startPlayer() {
             if (mediaPlayer != null) {
                 stopPlayer();
@@ -238,15 +271,16 @@ public class GLWallpaperService extends WallpaperService {
             mediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
                 @Override
                 public void onVideoSizeChanged(MediaPlayer mediaPlayer, int width, int height) {
-                    renderer.setVideoSize(width, height);
+                    renderer.setVideoSizeAndRotation(width, height, getVideoRotation());
                 }
             });
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {
-                    renderer.setVideoSize(
+                    renderer.setVideoSizeAndRotation(
                         mediaPlayer.getVideoWidth(),
-                        mediaPlayer.getVideoHeight()
+                        mediaPlayer.getVideoHeight(),
+                        getVideoRotation()
                     );
                     if (oldWallpaperCard != null &&
                         oldWallpaperCard.equals(wallpaperCard)) {
@@ -264,7 +298,8 @@ public class GLWallpaperService extends WallpaperService {
                 }
             });
             try {
-                if (wallpaperCard.getType() == WallpaperCard.Type.INTERNAL) {
+                switch (wallpaperCard.getType()) {
+                case INTERNAL:
                     AssetFileDescriptor afd = getAssets().openFd(wallpaperCard.getPath());
                     mediaPlayer.setDataSource(
                         afd.getFileDescriptor(),
@@ -272,14 +307,19 @@ public class GLWallpaperService extends WallpaperService {
                         afd.getLength()
                     );
                     afd.close();
-                } else {
+                    break;
+                case EXTERNAL:
                     mediaPlayer.setDataSource(context, Uri.parse(wallpaperCard.getPath()));
+                    break;
                 }
                 // This must be called after data source is set.
                 mediaPlayer.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
                 mediaPlayer.prepareAsync();
             } catch (IOException e) {
+                // Typically file removing, just restart, engine will check wallpaper path.
                 e.printStackTrace();
+                stopPlayer();
+                startPlayer();
             }
         }
 
