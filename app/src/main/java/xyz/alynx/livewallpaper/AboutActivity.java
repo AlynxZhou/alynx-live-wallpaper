@@ -39,13 +39,16 @@ public class AboutActivity extends AppCompatActivity {
         appDetail.setMovementMethod(new ScrollingMovementMethod());
         TextView appVersion = findViewById(R.id.app_version);
         String versionName = null;
+        int versionCode = 0;
         try {
             versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            versionCode = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
         } catch (PackageManager.NameNotFoundException e) {
             versionName = "Unknown";
         }
         appVersion.setText(String.format(
-            getResources().getText(R.string.app_version).toString(), versionName
+            getResources().getText(R.string.app_version).toString(),
+            versionName, versionCode, BuildConfig.DEBUG ? "Debug" : "Release"
         ));
     }
 }
