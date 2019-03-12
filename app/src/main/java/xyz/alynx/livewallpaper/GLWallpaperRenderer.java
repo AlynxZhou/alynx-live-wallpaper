@@ -40,7 +40,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
     private FloatBuffer vertices = null;
     private FloatBuffer texCoords = null;
     private IntBuffer indices = null;
-    private FloatBuffer mvp = null;
+    private float[] mvp = null;
     private int program = 0;
     private int mvpLocation = 0;
     private int[] textures = null;
@@ -103,16 +103,12 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
 
         textures = new int[1];
 
-        float[] mvpArray = {
+        mvp = new float[] {
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f
         };
-        mvp = ByteBuffer.allocateDirect(
-            mvpArray.length * BYTES_PER_FLOAT
-        ).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        mvp.put(mvpArray);
     }
 
     @Override
@@ -120,7 +116,6 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         vertices.position(0);
         texCoords.position(0);
         indices.position(0);
-        mvp.position(0);
 
         // No depth test for 2D video.
         GLES30.glDisable(GLES30.GL_DEPTH_TEST);
@@ -196,7 +191,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT);
 
         GLES30.glUseProgram(program);
-        GLES30.glUniformMatrix4fv(mvpLocation, 1, false, mvp);
+        GLES30.glUniformMatrix4fv(mvpLocation, 1, false, mvp, 0);
         GLES30.glDrawElements(GLES30.GL_TRIANGLES, 6, GLES30.GL_UNSIGNED_INT, indices);
     }
 
@@ -274,12 +269,10 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
 
     private void updateMatrix() {
         // Start with an identify matrix.
-        float[] model = {
-            1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f
-        };
+        for (int i = 0; i < 16; ++i) {
+            mvp[i] = 0.0f;
+        }
+        mvp[0] = mvp[5] = mvp[10] = mvp[15] = 1.0f;
         // OpenGL model matrix: scaling, rotating, translating.
         float videoRatio = (float)videoWidth / videoHeight;
         float screenRatio = (float)screenWidth / screenHeight;
@@ -287,34 +280,30 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             Utils.debug(TAG, "X-cropping");
             // Treat video and screen width as 1, and compare width to scale.
             Matrix.scaleM(
-                model, 0,
+                mvp, 0,
                 ((float)videoWidth / videoHeight) / ((float)screenWidth / screenHeight),
                 1, 1
             );
             // Some video recorder save video frames in direction differs from recoring,
             // and add a rotation metadata. Need to detect and rotate them.
             if (videoRotation % 360 != 0) {
-                Matrix.rotateM(model, 0, -videoRotation, 0,0, 1);
+                Matrix.rotateM(mvp, 0, -videoRotation, 0,0, 1);
             }
-            Matrix.translateM(model, 0, xOffset, 0, 0);
+            Matrix.translateM(mvp, 0, xOffset, 0, 0);
         } else {
             Utils.debug(TAG, "Y-cropping");
             // Treat video and screen height as 1, and compare height to scale.
             Matrix.scaleM(
-                model, 0, 1,
+                mvp, 0, 1,
                 ((float)videoHeight / videoWidth) / ((float)screenHeight / screenWidth), 1
             );
             // Some video recorder save video frames in direction differs from recoring,
             // and add a rotation metadata. Need to detect and rotate them.
             if (videoRotation % 360 != 0) {
-                Matrix.rotateM(model, 0, -videoRotation, 0,0, 1);
+                Matrix.rotateM(mvp, 0, -videoRotation, 0,0, 1);
             }
-            Matrix.translateM(model, 0, 0, yOffset, 0);
+            Matrix.translateM(mvp, 0, 0, yOffset, 0);
         }
         // This is a 2D center crop, so we only need model matrix, no view and projection.
-        mvp = ByteBuffer.allocateDirect(
-            model.length * BYTES_PER_FLOAT
-        ).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        mvp.put(model).position(0);
     }
 }
