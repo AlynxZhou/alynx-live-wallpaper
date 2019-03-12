@@ -1,7 +1,7 @@
 Alynx Live Wallpaper
 ====================
 
-A android app that allows you choose a video as wallpaper.
+An android app that allows you choose a video as wallpaper.
 ----------------------------------------------------------
 
 **Need GLESv3 support for cropping video size.**
