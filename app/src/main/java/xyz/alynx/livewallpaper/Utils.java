@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.opengl.GLES30;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -125,5 +126,11 @@ public class Utils {
             throw new RuntimeException(log);
         }
         return program;
+    }
+
+    public static void debug(final String tag, String message) {
+        if (BuildConfig.DEBUG) {
+            Log.d(tag, message);
+        }
     }
 }
