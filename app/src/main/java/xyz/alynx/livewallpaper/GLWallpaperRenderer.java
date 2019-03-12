@@ -50,6 +50,8 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
     private int videoWidth = 0;
     private int videoHeight = 0;
     private int videoRotation = 0;
+    private float xOffset = 0;
+    private float yOffset = 0;
     private boolean dirty = false;
     private final int BYTES_PER_FLOAT = 4;
     private final int BYTES_PER_INT = 4;
@@ -207,6 +209,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         if (screenWidth != width || screenHeight != height) {
             screenWidth = width;
             screenHeight = height;
+            Utils.debug(TAG, String.format("Set screen size to %dx%d", screenWidth, screenHeight));
             updateMatrix();
         }
     }
@@ -214,11 +217,40 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
     public void setVideoSizeAndRotation(int width, int height, int rotation) {
         // MediaPlayer already get right width and height, so we don't need to swap them.
         // Just record the rotation for frame display.
-        videoRotation = rotation;
-        if (videoWidth != width || videoHeight != height) {
+        if (videoWidth != width || videoHeight != height || videoRotation != rotation) {
             videoWidth = width;
             videoHeight = height;
+            videoRotation = rotation;
+            Utils.debug(TAG, String.format("Set video size to %dx%d", videoWidth, videoHeight));
+            Utils.debug(TAG, String.format("Set video rotation to %d", videoRotation));
             createSurfaceTexture();
+            updateMatrix();
+        }
+    }
+
+    public void setOffset(float xOffset, float yOffset) {
+        float maxXOffset = (1.0f - (
+            (float)screenWidth / screenHeight) / ((float)videoWidth / videoHeight)
+        ) / 2;
+        float maxYOffset = (1.0f - (
+            (float)screenHeight / screenWidth) / ((float)videoHeight / videoWidth)
+        ) / 2;
+        if (xOffset > maxXOffset) {
+            xOffset = maxXOffset;
+        }
+        if (xOffset < -maxXOffset) {
+            xOffset = -maxXOffset;
+        }
+        if (yOffset > maxYOffset) {
+            yOffset = maxYOffset;
+        }
+        if (yOffset < -maxXOffset) {
+            yOffset = -maxYOffset;
+        }
+        if (this.xOffset != xOffset || this.yOffset != yOffset) {
+            this.xOffset = xOffset;
+            this.yOffset = yOffset;
+            Utils.debug(TAG, String.format("Set offset to %fx%f", this.xOffset, this.yOffset));
             updateMatrix();
         }
     }
@@ -252,23 +284,32 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         float videoRatio = (float)videoWidth / videoHeight;
         float screenRatio = (float)screenWidth / screenHeight;
         if (videoRatio >= screenRatio) {
+            Utils.debug(TAG, "X-cropping");
             // Treat video and screen width as 1, and compare width to scale.
             Matrix.scaleM(
                 model, 0,
                 ((float)videoWidth / videoHeight) / ((float)screenWidth / screenHeight),
                 1, 1
             );
+            // Some video recorder save video frames in direction differs from recoring,
+            // and add a rotation metadata. Need to detect and rotate them.
+            if (videoRotation % 360 != 0) {
+                Matrix.rotateM(model, 0, -videoRotation, 0,0, 1);
+            }
+            Matrix.translateM(model, 0, xOffset, 0, 0);
         } else {
+            Utils.debug(TAG, "Y-cropping");
             // Treat video and screen height as 1, and compare height to scale.
             Matrix.scaleM(
                 model, 0, 1,
                 ((float)videoHeight / videoWidth) / ((float)screenHeight / screenWidth), 1
             );
-        }
-        // Some video recorder save video frames in direction differs from recoring,
-        // and add a rotation metadata. Need to detect and rotate them.
-        if (videoRotation % 360 != 0) {
-            Matrix.rotateM(model, 0, -videoRotation, 0,0, 1);
+            // Some video recorder save video frames in direction differs from recoring,
+            // and add a rotation metadata. Need to detect and rotate them.
+            if (videoRotation % 360 != 0) {
+                Matrix.rotateM(model, 0, -videoRotation, 0,0, 1);
+            }
+            Matrix.translateM(model, 0, 0, yOffset, 0);
         }
         // This is a 2D center crop, so we only need model matrix, no view and projection.
         mvp = ByteBuffer.allocateDirect(

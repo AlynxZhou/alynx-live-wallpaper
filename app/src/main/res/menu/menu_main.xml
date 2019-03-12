@@ -4,6 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="xyz.alynx.livewallpaper.MainActivity">
     <item
+        android:id="@+id/action_toggle_slide"
+        android:orderInCategory="100"
+        android:title="@string/action_allow_slide"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_remove"
         android:orderInCategory="100"
         android:title="@string/action_remove"

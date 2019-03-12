@@ -30,4 +30,7 @@
     <string name="got_read_storage_permission">已获取读取存储权限</string>
     <string name="not_got_read_storage_permission">未获取读取存储权限，将无法添加视频壁纸</string>
     <string name="read_storage_title">需要读取存储</string>
+    <string name="action_allow_slide">允许壁纸滑动</string>
+    <string name="action_disallow_slide">禁止壁纸滑动</string>
+    <string name="slide_warning">如果允许壁纸滑动，有可能会在预览界面看到黑边和壁纸偏移，但主页上不会出现这些问题。</string>
 </resources>

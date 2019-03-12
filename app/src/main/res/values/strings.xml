@@ -30,4 +30,7 @@
     <string name="got_read_storage_permission">Got read storage permission</string>
     <string name="not_got_read_storage_permission">Failed to get read storage permission and unable to add video wallpapers</string>
     <string name="read_storage_title">Needs to Read Storage</string>
+    <string name="action_allow_slide">Allow Slide</string>
+    <string name="action_disallow_slide">Disallow Slide</string>
+    <string name="slide_warning">If allowed sliding, it\'s possible to see blackbars and offset while previewing, and they won\'t show at homepage.</string>
 </resources>

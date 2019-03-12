@@ -31,6 +31,8 @@ import java.util.List;
 public class LWApplication extends Application {
     private final static String TAG = "LWApplication";
     public final static String JSON_FILE_NAME = "data.json";
+    public final static String OPTIONS_PREF = "options";
+    public final static String SLIDE_WALLPAPER_KEY = "slideWallpaper";
     private static List<WallpaperCard> cards = null;
     private static WallpaperCard currentWallpaperCard = null;
 

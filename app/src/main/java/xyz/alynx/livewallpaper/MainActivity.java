@@ -22,6 +22,7 @@ import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -64,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
     private final static String TAG = "MainActivity";
     public static final int SELECT_REQUEST_CODE = 3;
     private static final int EXTERNAL_STORAGE_REQUEST_CODE = 7;
-    private RecyclerView recyclerView = null;
     private CardAdapter cardAdapter = null;
     private AlertDialog addDialog = null;
     private LayoutInflater layoutInflater = null;
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
             super.onPreExecute();
             Snackbar.make(
                 findViewById(R.id.coordinator_layout),
-                getResources().getText(R.string.adding_wallpaper),
+                R.string.adding_wallpaper,
                 Snackbar.LENGTH_LONG
             ).show();
         }
@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
         cardAdapter = new CardAdapter(this, LWApplication.getCards());
 
-        recyclerView = findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -241,6 +241,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuItem toogleSlideMenu = menu.findItem(R.id.action_toggle_slide);
+        SharedPreferences pref = getSharedPreferences(LWApplication.OPTIONS_PREF, MODE_PRIVATE);
+        if (pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false)) {
+            toogleSlideMenu.setTitle(R.string.action_disallow_slide);
+        } else {
+            toogleSlideMenu.setTitle(R.string.action_allow_slide);
+        }
         return true;
     }
 
@@ -253,8 +260,26 @@ public class MainActivity extends AppCompatActivity {
             break;
         case R.id.action_about:
             Intent intent = new Intent(this, AboutActivity.class);
-            startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+            startActivity(
+                intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+            );
             break;
+        case R.id.action_toggle_slide:
+            SharedPreferences pref = getSharedPreferences(LWApplication.OPTIONS_PREF, MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            boolean newValue = !pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false);
+            editor.putBoolean(LWApplication.SLIDE_WALLPAPER_KEY, newValue);
+            editor.apply();
+            if (newValue) {
+                Snackbar.make(
+                    findViewById(R.id.coordinator_layout),
+                    R.string.slide_warning,
+                    Snackbar.LENGTH_LONG
+                ).show();
+                item.setTitle(R.string.action_disallow_slide);
+            } else {
+                item.setTitle(R.string.action_allow_slide);
+            }
         default:
             break;
         }
