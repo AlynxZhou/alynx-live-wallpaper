@@ -28,7 +28,7 @@
     <string name="default_failed">Loading default wallpaper failed! Please set manually.</string>
     <string name="read_storage_info">If you want to add videos on you device as wallpapers, you must grant READ_STORAGE permission to this app.\nIt promises that only read video by using system video picker which returns a uri instead of real path, so you won\'t worry about privacy leak.</string>
     <string name="got_read_storage_permission">Got read storage permission</string>
-    <string name="not_got_read_storage_permission">Failed to get read storage permission and unable to add video wallpapers</string>
+    <string name="not_got_read_storage_permission">Failed to get read storage permission and unable to add video wallpapers.</string>
     <string name="read_storage_title">Needs to Read Storage</string>
     <string name="action_allow_slide">Allow Slide</string>
     <string name="action_disallow_slide">Disallow Slide</string>

@@ -280,6 +280,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 item.setTitle(R.string.action_allow_slide);
             }
+            break;
         default:
             break;
         }

@@ -18,12 +18,10 @@ package xyz.alynx.livewallpaper;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
-import android.media.MediaPlayer;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.view.Surface;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -35,8 +33,9 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
     private final static String TAG = "GLWallpaperRenderer";
+    private final int BYTES_PER_FLOAT = 4;
+    private final int BYTES_PER_INT = 4;
     private Context context = null;
-    private MediaPlayer mediaPlayer = null;
     private FloatBuffer vertices = null;
     private FloatBuffer texCoords = null;
     private IntBuffer indices = null;
@@ -53,8 +52,6 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
     private float xOffset = 0;
     private float yOffset = 0;
     private boolean dirty = false;
-    private final int BYTES_PER_FLOAT = 4;
-    private final int BYTES_PER_INT = 4;
 
     public GLWallpaperRenderer(Context context) {
         this.context = context;
@@ -182,7 +179,6 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         }
 
         if (dirty) {
-            // It seems we can only update texture within a EGL context.
             surfaceTexture.updateTexImage();
             dirty = false;
         }
@@ -195,9 +191,11 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         GLES30.glDrawElements(GLES30.GL_TRIANGLES, 6, GLES30.GL_UNSIGNED_INT, indices);
     }
 
-    public void setSourceMediaPlayer(MediaPlayer mediaPlayer) {
-        this.mediaPlayer = mediaPlayer;
-        createSurfaceTexture();
+    public SurfaceTexture getSurfaceTexture() {
+        if (surfaceTexture == null) {
+            createSurfaceTexture();
+        }
+        return surfaceTexture;
     }
 
     public void setScreenSize(int width, int height) {
@@ -218,7 +216,6 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             videoRotation = rotation;
             Utils.debug(TAG, String.format("Set video size to %dx%d", videoWidth, videoHeight));
             Utils.debug(TAG, String.format("Set video rotation to %d", videoRotation));
-            createSurfaceTexture();
             updateMatrix();
         }
     }
@@ -258,13 +255,10 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         surfaceTexture.setDefaultBufferSize(videoWidth, videoHeight);
         surfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
             @Override
-            public void onFrameAvailable(SurfaceTexture st) {
+            public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                 dirty = true;
             }
         });
-        if (mediaPlayer != null) {
-            mediaPlayer.setSurface(new Surface(surfaceTexture));
-        }
     }
 
     private void updateMatrix() {

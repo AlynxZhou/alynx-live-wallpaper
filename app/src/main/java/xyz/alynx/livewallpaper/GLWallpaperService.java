@@ -23,13 +23,25 @@ import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.ParcelFileDescriptor;
 import android.service.wallpaper.WallpaperService;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
+
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.video.VideoListener;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -54,16 +66,22 @@ import java.util.Objects;
  */
 public class GLWallpaperService extends WallpaperService {
     private final static String TAG = "GLWallpaperService";
-    protected class GLWallpaperEngine extends Engine {
+
+    public class GLWallpaperEngine extends Engine {
         private final static String TAG = "GLWallpaperEngine";
         private final static String CURRENT_CARD_PREF = "currentWallpaperCard";
         private Context context = null;
         private GLWallpaperSurfaceView glSurfaceView = null;
-        private MediaPlayer mediaPlayer = null;
+        private SimpleExoPlayer exoPlayer = null;
+        private MediaSource videoSource = null;
+        private DefaultTrackSelector trackSelector = null;
         private WallpaperCard wallpaperCard = null;
         private WallpaperCard oldWallpaperCard = null;
         private GLWallpaperRenderer renderer = null;
-        private int progress = 0;
+        private int videoRotation = 0;
+        private int videoWidth = 0;
+        private int videoHeight = 0;
+        private long progress = 0;
 
         private class GLWallpaperSurfaceView extends GLSurfaceView {
             public GLWallpaperSurfaceView(Context context) {
@@ -128,7 +146,9 @@ public class GLWallpaperService extends WallpaperService {
                 xOffset, yOffset, xOffsetStep,
                 yOffsetStep, xPixelOffset, yPixelOffset
             );
-            SharedPreferences pref = getSharedPreferences(LWApplication.OPTIONS_PREF, MODE_PRIVATE);
+            SharedPreferences pref = getSharedPreferences(
+                LWApplication.OPTIONS_PREF, MODE_PRIVATE
+            );
             if (pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false)) {
                 renderer.setOffset(0.5f - xOffset, 0.5f - yOffset);
             } else {
@@ -264,127 +284,98 @@ public class GLWallpaperService extends WallpaperService {
             saveWallpaperCardPreference();
         }
 
-        private int getVideoRotation() {
+        private void getVideoMetadata() throws IOException {
             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-            try {
-                switch (wallpaperCard.getType()) {
-                case INTERNAL:
-                    AssetFileDescriptor afd = getAssets().openFd(wallpaperCard.getPath());
-                    mmr.setDataSource(
-                        afd.getFileDescriptor(),
-                        afd.getStartOffset(),
-                        afd.getLength()
-                    );
-                    afd.close();
-                    break;
-                case EXTERNAL:
-                    mmr.setDataSource(context, wallpaperCard.getUri());
-                    break;
-                }
-            } catch (IOException e) {
-                // Typically file removing, just restart, engine will check wallpaper path.
-                e.printStackTrace();
-                stopPlayer();
-                startPlayer();
+            switch (wallpaperCard.getType()) {
+            case INTERNAL:
+                AssetFileDescriptor afd = getAssets().openFd(wallpaperCard.getPath());
+                mmr.setDataSource(
+                    afd.getFileDescriptor(),
+                    afd.getStartOffset(),
+                    afd.getDeclaredLength()
+                );
+                afd.close();
+                break;
+            case EXTERNAL:
+                mmr.setDataSource(context, wallpaperCard.getUri());
+                break;
             }
             String rotation = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
+            String width = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
+            String height = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
             mmr.release();
-            try {
-                return Integer.parseInt(rotation);
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-                return 0;
-            }
+            videoRotation = Integer.parseInt(rotation);
+            videoWidth = Integer.parseInt(width);
+            videoHeight = Integer.parseInt(height);
         }
 
         private void startPlayer() {
-            if (mediaPlayer != null) {
+            if (exoPlayer != null) {
                 stopPlayer();
             }
             loadWallpaperCard();
-            mediaPlayer = new MediaPlayer();
-            renderer.setSourceMediaPlayer(mediaPlayer);
-            mediaPlayer.setLooping(true);
-            mediaPlayer.setVolume(0.0f, 0.0f);
-            mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                @Override
-                public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
-                    // Typically file removing, just restart, engine will check wallpaper path.
-                    if (!checkWallpaperCardValid()) {
-                        stopPlayer();
-                        startPlayer();
-                        return true;
-                    }
-                    return false;
-                }
-            });
-            mediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
-                @Override
-                public void onVideoSizeChanged(MediaPlayer mediaPlayer, int width, int height) {
-                    renderer.setVideoSizeAndRotation(width, height, getVideoRotation());
-                }
-            });
-            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mediaPlayer) {
-                    renderer.setVideoSizeAndRotation(
-                        mediaPlayer.getVideoWidth(),
-                        mediaPlayer.getVideoHeight(),
-                        getVideoRotation()
-                    );
-                    if (oldWallpaperCard != null &&
-                        oldWallpaperCard.equals(wallpaperCard)) {
-                        mediaPlayer.seekTo(progress);
-                    } else {
-                        mediaPlayer.seekTo(0);
-                    }
-
-                }
-            });
-            mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
-                @Override
-                public void onSeekComplete(MediaPlayer mediaPlayer) {
-                    Utils.debug(TAG, "Player starting");
-                    mediaPlayer.start();
-                }
-            });
             try {
-                switch (wallpaperCard.getType()) {
-                case INTERNAL:
-                    AssetFileDescriptor afd = getAssets().openFd(wallpaperCard.getPath());
-                    mediaPlayer.setDataSource(
-                        afd.getFileDescriptor(),
-                        afd.getStartOffset(),
-                        afd.getLength()
-                    );
-                    afd.close();
-                    break;
-                case EXTERNAL:
-                    mediaPlayer.setDataSource(context, wallpaperCard.getUri());
-                    break;
-                }
-                // This must be called after data source is set.
-                mediaPlayer.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
-                mediaPlayer.prepareAsync();
+                getVideoMetadata();
             } catch (IOException e) {
-                // Typically file removing, just restart, engine will check wallpaper path.
                 e.printStackTrace();
                 stopPlayer();
                 startPlayer();
             }
+            trackSelector = new DefaultTrackSelector();
+            exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+            exoPlayer.setVolume(0.0f);
+            // Disable audio decoder.
+            int count = exoPlayer.getRendererCount();
+            for (int i = 0; i < count; ++i) {
+                if (exoPlayer.getRendererType(i) == C.TRACK_TYPE_AUDIO) {
+                    trackSelector.setParameters(
+                        trackSelector.buildUponParameters().setRendererDisabled(i, true)
+                    );
+                    break;
+                }
+            }
+            exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(
+                context, Util.getUserAgent(context, "xyz.alynx.livewallpaper")
+            );
+            // ExoPlayer can load file:///android_asset/ uri correctly.
+            videoSource = new ExtractorMediaSource.Factory(
+                dataSourceFactory
+            ).createMediaSource(wallpaperCard.getUri());
+            // Let we assume video has correct info in metadata, or user should fix it.
+            renderer.setVideoSizeAndRotation(videoWidth, videoHeight, videoRotation);
+            // Get surfaceTexture after set size.
+            exoPlayer.setVideoSurface(new Surface(renderer.getSurfaceTexture()));
+            exoPlayer.prepare(videoSource);
+            exoPlayer.addVideoListener(new VideoListener() {
+                @Override
+                public void onVideoSizeChanged(
+                    int width, int height,
+                    int unappliedRotationDegrees, float pixelWidthHeightRatio
+                ) {
+                    videoWidth = width;
+                    videoHeight = height;
+                    videoRotation = unappliedRotationDegrees;
+                    renderer.setVideoSizeAndRotation(videoWidth, videoHeight, videoRotation);
+                }
+            });
+            if (oldWallpaperCard != null &&
+                oldWallpaperCard.equals(wallpaperCard)) {
+                exoPlayer.seekTo(progress);
+            }
+            exoPlayer.setPlayWhenReady(true);
         }
 
         private void stopPlayer() {
-            if (mediaPlayer != null) {
-                if (mediaPlayer.isPlaying()) {
+            if (exoPlayer != null) {
+                if (exoPlayer.getPlayWhenReady()) {
                     Utils.debug(TAG, "Player stopping");
-                    mediaPlayer.pause();
-                    progress = mediaPlayer.getCurrentPosition();
-                    mediaPlayer.stop();
+                    exoPlayer.setPlayWhenReady(false);
+                    progress = exoPlayer.getCurrentPosition();
+                    exoPlayer.stop();
                 }
-                mediaPlayer.reset();
-                mediaPlayer.release();
-                mediaPlayer = null;
+                exoPlayer.release();
+                exoPlayer = null;
             }
         }
     }
