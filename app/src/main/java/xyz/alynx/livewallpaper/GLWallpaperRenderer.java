@@ -22,6 +22,9 @@ import android.opengl.GLES11Ext;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.view.Surface;
+
+import com.google.android.exoplayer2.SimpleExoPlayer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -191,11 +194,11 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         GLES30.glDrawElements(GLES30.GL_TRIANGLES, 6, GLES30.GL_UNSIGNED_INT, indices);
     }
 
-    public SurfaceTexture getSurfaceTexture() {
-        if (surfaceTexture == null) {
-            createSurfaceTexture();
-        }
-        return surfaceTexture;
+    public void setSourcePlayer(SimpleExoPlayer exoPlayer) {
+        // Re-create SurfaceTexture when getting a new player.
+        // Because maybe a new video is loaded.
+        createSurfaceTexture();
+        exoPlayer.setVideoSurface(new Surface(surfaceTexture));
     }
 
     public void setScreenSize(int width, int height) {
@@ -257,6 +260,7 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             @Override
             public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                 dirty = true;
+                Utils.debug(TAG, "stamp: " + surfaceTexture.getTimestamp());
             }
         });
     }

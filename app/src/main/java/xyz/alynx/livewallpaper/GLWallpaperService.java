@@ -167,9 +167,9 @@ public class GLWallpaperService extends WallpaperService {
 
         @Override
         public void onSurfaceDestroyed(SurfaceHolder holder) {
+            super.onSurfaceDestroyed(holder);
             stopPlayer();
             glSurfaceView.onDestroy();
-            super.onSurfaceDestroyed(holder);
         }
 
         @Override
@@ -313,6 +313,7 @@ public class GLWallpaperService extends WallpaperService {
             if (exoPlayer != null) {
                 stopPlayer();
             }
+            Utils.debug(TAG, "Player starting");
             loadWallpaperCard();
             try {
                 getVideoMetadata();
@@ -334,7 +335,7 @@ public class GLWallpaperService extends WallpaperService {
                     break;
                 }
             }
-            exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+            exoPlayer.setRepeatMode(Player.REPEAT_MODE_ALL);
             DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(
                 context, Util.getUserAgent(context, "xyz.alynx.livewallpaper")
             );
@@ -344,8 +345,8 @@ public class GLWallpaperService extends WallpaperService {
             ).createMediaSource(wallpaperCard.getUri());
             // Let we assume video has correct info in metadata, or user should fix it.
             renderer.setVideoSizeAndRotation(videoWidth, videoHeight, videoRotation);
-            // Get surfaceTexture after set size.
-            exoPlayer.setVideoSurface(new Surface(renderer.getSurfaceTexture()));
+            // This must be set after getting video info.
+            renderer.setSourcePlayer(exoPlayer);
             exoPlayer.prepare(videoSource);
             exoPlayer.addVideoListener(new VideoListener() {
                 @Override
