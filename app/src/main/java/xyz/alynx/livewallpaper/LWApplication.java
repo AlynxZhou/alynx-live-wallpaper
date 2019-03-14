@@ -33,6 +33,8 @@ public class LWApplication extends Application {
     public final static String JSON_FILE_NAME = "data.json";
     public final static String OPTIONS_PREF = "options";
     public final static String SLIDE_WALLPAPER_KEY = "slideWallpaper";
+    public final static String INTERNAL_WALLPAPER_IMAGE_PATH = "wallpapers/fire-rain/fire-rain-512x384.jpg";
+    public final static String INTERNAL_WALLPAPER_VIDEO_PATH = "wallpapers/fire-rain/fire-rain-720x720.mp4";
     private static List<WallpaperCard> cards = null;
     private static WallpaperCard currentWallpaperCard = null;
 
@@ -42,16 +44,14 @@ public class LWApplication extends Application {
         cards = new ArrayList<>();
         Bitmap thumbnail = null;
         try {
-            thumbnail = BitmapFactory.decodeStream(getAssets().open(
-                "wallpapers/saber-sandwich/saber-sandwich-512x384.jpg"
-            ));
+            thumbnail = BitmapFactory.decodeStream(getAssets().open(INTERNAL_WALLPAPER_IMAGE_PATH));
         } catch (IOException e) {
             e.printStackTrace();
         }
         cards.add(new WallpaperCard(
-            getApplicationContext().getResources().getString(R.string.saber_sandwich), "wallpapers/saber-sandwich/saber-sandwich-1080x1080.mp4",
-            Uri.parse(
-                "file:///android_asset/wallpapers/saber-sandwich/saber-sandwich-1080x1080.mp4"
+            getApplicationContext().getResources().getString(R.string.fire_rain),
+            INTERNAL_WALLPAPER_VIDEO_PATH, Uri.parse(
+                "file:///android_asset/" + INTERNAL_WALLPAPER_VIDEO_PATH
             ), WallpaperCard.Type.INTERNAL, thumbnail
         ));
     }

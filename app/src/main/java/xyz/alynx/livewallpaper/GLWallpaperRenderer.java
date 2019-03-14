@@ -260,7 +260,6 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             @Override
             public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                 dirty = true;
-                Utils.debug(TAG, "stamp: " + surfaceTexture.getTimestamp());
             }
         });
     }
