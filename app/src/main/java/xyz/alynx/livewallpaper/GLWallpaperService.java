@@ -191,6 +191,8 @@ public class GLWallpaperService extends WallpaperService {
                 glSurfaceView.setPreserveEGLContextOnPause(true);
                 renderer = new GLWallpaperRenderer(context);
                 glSurfaceView.setRenderer(renderer);
+                // On demand render will lead to black screen.
+                glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
             } else {
                 throw new RuntimeException("GLESv3 is not supported");
             }

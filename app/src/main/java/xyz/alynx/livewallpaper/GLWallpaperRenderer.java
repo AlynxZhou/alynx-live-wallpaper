@@ -54,10 +54,14 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
     private int videoRotation = 0;
     private float xOffset = 0;
     private float yOffset = 0;
-    private boolean dirty = false;
+    // Fix bug like https://stackoverflow.com/questions/14185661/surfacetexture-onframeavailablelistener-stops-being-called
+    private long updatedFrame = 0;
+    private long renderedFrame = 0;
 
     public GLWallpaperRenderer(Context context) {
         this.context = context;
+        updatedFrame = 0;
+        renderedFrame = 0;
 
         // Those replaced glGenBuffers() and glBufferData().
         float[] vertexArray = {
@@ -181,9 +185,12 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
             return;
         }
 
-        if (dirty) {
+        if (renderedFrame < updatedFrame) {
             surfaceTexture.updateTexImage();
-            dirty = false;
+            ++renderedFrame;
+            Utils.debug(
+                TAG, "renderedFrame: " + renderedFrame + " updatedFrame: " + updatedFrame
+            );
         }
 
         GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -254,12 +261,14 @@ public class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         if (surfaceTexture != null) {
             surfaceTexture.release();
         }
+        updatedFrame = 0;
+        renderedFrame = 0;
         surfaceTexture = new SurfaceTexture(textures[0]);
         surfaceTexture.setDefaultBufferSize(videoWidth, videoHeight);
         surfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
             @Override
             public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                dirty = true;
+                ++updatedFrame;
             }
         });
     }
