@@ -154,13 +154,13 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
             )
         );
         mvpLocation = GLES20.glGetUniformLocation(program, "mvp");
-        // Position is set in shader sources.
+        // Position is NOT set in shader sources.
         GLES20.glVertexAttribPointer(
-            0, 2, GLES20.GL_FLOAT,
+            GLES20.glGetAttribLocation(program, "in_position"), 2, GLES20.GL_FLOAT,
             false, 0, vertices
         );
         GLES20.glVertexAttribPointer(
-            1, 2, GLES20.GL_FLOAT,
+            GLES20.glGetAttribLocation(program, "in_tex_coord"), 2, GLES20.GL_FLOAT,
             false, 0, texCoords
         );
 
