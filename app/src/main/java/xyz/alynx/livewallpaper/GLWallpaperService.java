@@ -27,7 +27,6 @@ import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.ParcelFileDescriptor;
 import android.service.wallpaper.WallpaperService;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
@@ -41,7 +40,6 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import com.google.android.exoplayer2.video.VideoListener;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -115,7 +113,7 @@ public class GLWallpaperService extends WallpaperService {
         @Override
         public void onSurfaceCreated(SurfaceHolder surfaceHolder) {
             super.onSurfaceCreated(surfaceHolder);
-            glSurfaceView = createGLSurfaceView();
+            createGLSurfaceView();
             int width = surfaceHolder.getSurfaceFrame().width();
             int height = surfaceHolder.getSurfaceFrame().height();
             renderer.setScreenSize(width, height);
@@ -130,8 +128,8 @@ public class GLWallpaperService extends WallpaperService {
                     startPlayer();
                     glSurfaceView.onResume();
                 } else {
-                    stopPlayer();
                     glSurfaceView.onPause();
+                    stopPlayer();
                 }
             }
         }
@@ -168,8 +166,8 @@ public class GLWallpaperService extends WallpaperService {
         @Override
         public void onSurfaceDestroyed(SurfaceHolder holder) {
             super.onSurfaceDestroyed(holder);
-            stopPlayer();
             glSurfaceView.onDestroy();
+            stopPlayer();
         }
 
         @Override
@@ -177,7 +175,11 @@ public class GLWallpaperService extends WallpaperService {
             super.onDestroy();
         }
 
-        private GLWallpaperSurfaceView createGLSurfaceView() {
+        private void createGLSurfaceView() {
+            if (glSurfaceView != null) {
+                glSurfaceView.onDestroy();
+                glSurfaceView = null;
+            }
             glSurfaceView = new GLWallpaperSurfaceView(context);
             ActivityManager activityManager = (ActivityManager)getSystemService(
                 Context.ACTIVITY_SERVICE
@@ -188,15 +190,18 @@ public class GLWallpaperService extends WallpaperService {
             ConfigurationInfo configInfo = activityManager.getDeviceConfigurationInfo();
             if (configInfo.reqGlEsVersion >= 0x30000) {
                 glSurfaceView.setEGLContextClientVersion(3);
-                glSurfaceView.setPreserveEGLContextOnPause(true);
-                renderer = new GLWallpaperRenderer(context);
-                glSurfaceView.setRenderer(renderer);
-                // On demand render will lead to black screen.
-                glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+                renderer = new GLES30WallpaperRenderer(context);
+            } else if (configInfo.reqGlEsVersion >= 0x20000) {
+                glSurfaceView.setEGLContextClientVersion(3);
+                renderer = new GLES20WallpaperRenderer(context);
             } else {
-                throw new RuntimeException("GLESv3 is not supported");
+                Toast.makeText(context, R.string.gles_version, Toast.LENGTH_LONG).show();
+                throw new RuntimeException("Needs GLESv2 or higher");
             }
-            return glSurfaceView;
+            glSurfaceView.setPreserveEGLContextOnPause(true);
+            glSurfaceView.setRenderer(renderer);
+            // On demand render will lead to black screen.
+            glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         }
 
         private boolean checkWallpaperCardValid() {
@@ -280,7 +285,7 @@ public class GLWallpaperService extends WallpaperService {
                 } else {
                     wallpaperCard = null;
                     Toast.makeText(context, R.string.default_failed, Toast.LENGTH_LONG).show();
-                    return;
+                    throw new RuntimeException("Failed to fallback to internal wallpaper");
                 }
             }
             saveWallpaperCardPreference();
@@ -309,6 +314,7 @@ public class GLWallpaperService extends WallpaperService {
             videoRotation = Integer.parseInt(rotation);
             videoWidth = Integer.parseInt(width);
             videoHeight = Integer.parseInt(height);
+
         }
 
         private void startPlayer() {
@@ -350,18 +356,8 @@ public class GLWallpaperService extends WallpaperService {
             // This must be set after getting video info.
             renderer.setSourcePlayer(exoPlayer);
             exoPlayer.prepare(videoSource);
-            exoPlayer.addVideoListener(new VideoListener() {
-                @Override
-                public void onVideoSizeChanged(
-                    int width, int height,
-                    int unappliedRotationDegrees, float pixelWidthHeightRatio
-                ) {
-                    videoWidth = width;
-                    videoHeight = height;
-                    videoRotation = unappliedRotationDegrees;
-                    renderer.setVideoSizeAndRotation(videoWidth, videoHeight, videoRotation);
-                }
-            });
+            // ExoPlayer's video size changed listener is buggy. Don't use it.
+            // It give's width and height after rotation, but did not rotate frames.
             if (oldWallpaperCard != null &&
                 oldWallpaperCard.equals(wallpaperCard)) {
                 exoPlayer.seekTo(progress);
@@ -380,6 +376,8 @@ public class GLWallpaperService extends WallpaperService {
                 exoPlayer.release();
                 exoPlayer = null;
             }
+            videoSource = null;
+            trackSelector = null;
         }
     }
 

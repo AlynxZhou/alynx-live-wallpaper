@@ -9,7 +9,7 @@ An Android app that allows you choose a video as wallpaper.
 [![Play Store
 Page](https://img.shields.io/badge/Play%20Store-Alynx%20Live%20Wallpaper-blue.svg?style=for-the-badge&logo=google-play)](https://play.google.com/store/apps/details?id=xyz.alynx.livewallpaper)
 
-**Need GLESv3 support for cropping video size.**
+**Need GLESv2 or higher version support for cropping video size.**
 
 # Icons
 

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.util.Log;
 
@@ -75,7 +76,7 @@ public class Utils {
         return bitmap;
     }
 
-    public static int compileShaderResource(
+    public static int compileShaderResourceGLES30(
         Context context,
         int shaderType,
         int shaderRes
@@ -110,7 +111,7 @@ public class Utils {
         return shader;
     }
 
-    public static int linkProgram(int vertShader, int fragShader) throws RuntimeException {
+    public static int linkProgramGLES30(int vertShader, int fragShader) throws RuntimeException {
         int program = GLES30.glCreateProgram();
         if (program == 0) {
             throw new RuntimeException("Failed to create program");
@@ -123,6 +124,59 @@ public class Utils {
         if (status[0] == 0) {
             String log = GLES30.glGetProgramInfoLog(program);
             GLES30.glDeleteProgram(program);
+            throw new RuntimeException(log);
+        }
+        return program;
+    }
+
+    public static int compileShaderResourceGLES20(
+        Context context,
+        int shaderType,
+        int shaderRes
+    ) throws RuntimeException {
+        InputStream inputStream = context.getResources().openRawResource(shaderRes);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String line = null;
+        StringBuilder stringBuilder = new StringBuilder();
+        try {
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append('\n');
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
+        String shaderSource = stringBuilder.toString();
+        int shader = GLES20.glCreateShader(shaderType);
+        if (shader == 0) {
+            throw new RuntimeException("Failed to create shader");
+        }
+        GLES20.glShaderSource(shader, shaderSource);
+        GLES20.glCompileShader(shader);
+        int[] status = new int[1];
+        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0);
+        if (status[0] == 0) {
+            String log = GLES20.glGetShaderInfoLog(shader);
+            GLES20.glDeleteShader(shader);
+            throw new RuntimeException(log);
+        }
+        return shader;
+    }
+
+    public static int linkProgramGLES20(int vertShader, int fragShader) throws RuntimeException {
+        int program = GLES20.glCreateProgram();
+        if (program == 0) {
+            throw new RuntimeException("Failed to create program");
+        }
+        GLES20.glAttachShader(program, vertShader);
+        GLES20.glAttachShader(program, fragShader);
+        GLES20.glLinkProgram(program);
+        int[] status = new int[1];
+        GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, status, 0);
+        if (status[0] == 0) {
+            String log = GLES20.glGetProgramInfoLog(program);
+            GLES20.glDeleteProgram(program);
             throw new RuntimeException(log);
         }
         return program;
