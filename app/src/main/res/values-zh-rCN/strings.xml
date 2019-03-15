@@ -25,10 +25,6 @@
     <string name="empty_name_or_path">无法添加名称或路径为空的壁纸</string>
     <string name="invalid_path">壁纸路径无效，加载默认值……</string>
     <string name="default_failed">加载默认壁纸失败！请手动设置。</string>
-    <string name="read_storage_info">若要添加设备上的视频作为壁纸，您需要给予该应用读取存储设备（READ_STORAGE）的权限。\n该应用承诺只读取视频，因为其使用系统提供的视频选择器，这个选择器只会返回一个资源定位符，而不是真实的文件路径，所以您不需要担心隐私泄漏。</string>
-    <string name="got_read_storage_permission">已获取读取存储权限</string>
-    <string name="not_got_read_storage_permission">未获取读取存储权限，将无法添加视频壁纸。</string>
-    <string name="read_storage_title">需要读取存储</string>
     <string name="action_allow_slide">允许壁纸滑动</string>
     <string name="action_disallow_slide">禁止壁纸滑动</string>
     <string name="slide_warning">如果允许壁纸滑动，有可能会在预览界面看到黑边和壁纸偏移，但主页上不会出现这些问题。</string>

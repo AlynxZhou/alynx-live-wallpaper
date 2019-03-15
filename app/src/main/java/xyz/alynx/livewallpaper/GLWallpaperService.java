@@ -63,11 +63,11 @@ import java.util.Objects;
  *
  */
 public class GLWallpaperService extends WallpaperService {
-    private final static String TAG = "GLWallpaperService";
+    private static final String TAG = "GLWallpaperService";
 
     public class GLWallpaperEngine extends Engine {
-        private final static String TAG = "GLWallpaperEngine";
-        private final static String CURRENT_CARD_PREF = "currentWallpaperCard";
+        private static final String TAG = "GLWallpaperEngine";
+        private static final String CURRENT_CARD_PREF = "currentWallpaperCard";
         private Context context = null;
         private GLWallpaperSurfaceView glSurfaceView = null;
         private SimpleExoPlayer exoPlayer = null;
@@ -82,6 +82,8 @@ public class GLWallpaperService extends WallpaperService {
         private long progress = 0;
 
         private class GLWallpaperSurfaceView extends GLSurfaceView {
+            private static final String TAG = "GLWallpaperSurface";
+
             public GLWallpaperSurfaceView(Context context) {
                 super(context);
             }

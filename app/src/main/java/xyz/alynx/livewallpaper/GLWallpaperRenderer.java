@@ -6,7 +6,7 @@ import android.opengl.GLSurfaceView;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
 public abstract class GLWallpaperRenderer implements GLSurfaceView.Renderer {
-    private final static String TAG = "GLWallpaperRenderer";
+    private static final String TAG = "GLWallpaperRenderer";
     protected Context context = null;
 
     public GLWallpaperRenderer(Context context) {

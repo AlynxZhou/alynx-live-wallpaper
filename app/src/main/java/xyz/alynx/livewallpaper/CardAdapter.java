@@ -34,7 +34,7 @@ import android.widget.TextView;
 import java.util.List;
 
 public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
-    private final static String TAG = "CardAdapter";
+    private static final String TAG = "CardAdapter";
     private Context context = null;
     private List<WallpaperCard> cards = null;
     private boolean removable = false;
@@ -127,7 +127,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
 }
 
 class CardViewHolder extends RecyclerView.ViewHolder {
-    private final static String TAG = "CardViewHolder";
+    private static final String TAG = "CardViewHolder";
     public CardView cardView = null;
     public ImageView thumbnail = null;
     public TextView name = null;

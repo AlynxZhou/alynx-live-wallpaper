@@ -31,7 +31,7 @@ import java.util.Objects;
  */
 
 public class WallpaperCard {
-    private final static String TAG = "WallpaperCard";
+    private static final String TAG = "WallpaperCard";
     // INTERNAL means this video is bundled into app assets.
     // So it cannot be removed.
     public enum Type {INTERNAL, EXTERNAL};

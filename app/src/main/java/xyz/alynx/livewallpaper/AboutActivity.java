@@ -33,6 +33,7 @@ public class AboutActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(R.string.action_about);
         }
         TextView appDetail = findViewById(R.id.app_detail);
         appDetail.setMovementMethod(new ScrollingMovementMethod());

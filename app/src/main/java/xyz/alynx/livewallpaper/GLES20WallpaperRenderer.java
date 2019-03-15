@@ -34,7 +34,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
-    private final static String TAG = "GLES20WallpaperRenderer";
+    private static final String TAG = "GLES20WallpaperRenderer";
     private final int BYTES_PER_FLOAT = 4;
     private final int BYTES_PER_INT = 4;
     private FloatBuffer vertices = null;

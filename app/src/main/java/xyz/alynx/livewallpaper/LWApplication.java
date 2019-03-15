@@ -29,12 +29,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LWApplication extends Application {
-    private final static String TAG = "LWApplication";
-    public final static String JSON_FILE_NAME = "data.json";
-    public final static String OPTIONS_PREF = "options";
-    public final static String SLIDE_WALLPAPER_KEY = "slideWallpaper";
-    public final static String INTERNAL_WALLPAPER_IMAGE_PATH = "wallpapers/fire-rain/fire-rain-512x384.jpg";
-    public final static String INTERNAL_WALLPAPER_VIDEO_PATH = "wallpapers/fire-rain/fire-rain-720x720.mp4";
+    private static final String TAG = "LWApplication";
+    public static final String JSON_FILE_NAME = "data.json";
+    public static final String OPTIONS_PREF = "options";
+    public static final String SLIDE_WALLPAPER_KEY = "slideWallpaper";
+    public static final String INTERNAL_WALLPAPER_IMAGE_PATH = "wallpapers/fire-rain/fire-rain-512x384.jpg";
+    public static final String INTERNAL_WALLPAPER_VIDEO_PATH = "wallpapers/fire-rain/fire-rain-720x720.mp4";
     private static List<WallpaperCard> cards = null;
     private static WallpaperCard currentWallpaperCard = null;
 

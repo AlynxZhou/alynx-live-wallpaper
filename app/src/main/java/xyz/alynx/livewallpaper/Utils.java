@@ -30,7 +30,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class Utils {
-    private final static String TAG = "Utils";
+    private static final String TAG = "Utils";
 
     /**
      * createVideoThumbnailFromUri
