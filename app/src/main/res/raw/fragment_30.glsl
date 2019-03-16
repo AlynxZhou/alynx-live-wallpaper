@@ -1,6 +1,9 @@
 #version 300 es
+#ifdef GL_OES_EGL_image_external_essl3
 #extension GL_OES_EGL_image_external_essl3 : require
+#else
 #extension GL_OES_EGL_image_external : require
+#endif
 
 // Some Android phone driver needs to put pre-processor in the first line. (e.g. Huawei Kirin)
 
