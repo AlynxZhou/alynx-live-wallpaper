@@ -8,7 +8,7 @@
     <dimen name="backdrop_title">30dp</dimen>
     <dimen name="backdrop_subtitle">18dp</dimen>
     <dimen name="card_margin">5dp</dimen>
-    <dimen name="card_radius">0dp</dimen>
+    <dimen name="card_radius">3dp</dimen>
     <dimen name="thumbnail_width">160dp</dimen>
     <dimen name="thumbnail_height">160dp</dimen>
     <dimen name="name_padding">10dp</dimen>
@@ -24,7 +24,14 @@
     <dimen name="app_name_size">30sp</dimen>
     <dimen name="app_author_size">21sp</dimen>
     <dimen name="app_detail_size">15sp</dimen>
+    <dimen name="main_toolbar_padding">7dp</dimen>
+    <dimen name="content_margin">16dp</dimen>
+    <dimen name="app_detail_padding">15dp</dimen>
     <dimen name="app_author_link_size">18sp</dimen>
     <dimen name="app_detail_height">300dp</dimen>
     <dimen name="app_version_size">15sp</dimen>
+    <dimen name="support_author_size">30sp</dimen>
+    <dimen name="reward_text_size">20sp</dimen>
+    <dimen name="reward_image_margin">30dp</dimen>
+    <dimen name="reward_text_margin">15dp</dimen>
 </resources>

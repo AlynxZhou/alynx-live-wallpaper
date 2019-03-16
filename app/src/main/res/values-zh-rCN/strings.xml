@@ -30,4 +30,11 @@
     <string name="slide_warning">如果允许壁纸滑动，有可能会在预览界面看到黑边和壁纸偏移，但主页上不会出现这些问题。</string>
     <string name="fire_rain">火之雨</string>
     <string name="gles_version">需要支持 GLESv2 或更高版本！</string>
+    <string name="action_reward">打赏</string>
+    <string name="support_author">支持一下作者</string>
+    <string name="a_cup_of_coffee">假如有人想学习 Android 开发，我希望这个项目能帮助他们，所以我把代码作为开源项目释出了。\n\n我在这个应用上花费了不少精力，但到目前为止并没有从中得到一点收入，\n\n但如果你喜欢这个应用并且想赞助这个大学生一杯咖啡的话，你可以通过下面的方式进行打赏。</string>
+    <string name="alipay">支付宝</string>
+    <string name="paypal_link">http://paypal.me/AlynxZhou</string>
+    <string name="paypal">贝宝</string>
+    <string name="wechatpay">微信支付</string>
 </resources>

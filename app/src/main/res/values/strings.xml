@@ -30,4 +30,11 @@
     <string name="action_disallow_slide">Disallow Slide</string>
     <string name="slide_warning">If allowed sliding, it\'s possible to see blackbars and offset while previewing, and they won\'t show at homepage.</string>
     <string name="gles_version">Needs to support GLESv2 or higher version!</string>
+    <string name="action_reward">Reward</string>
+    <string name="support_author">Support Author</string>
+    <string name="a_cup_of_coffee">Because I want to help others learn Android from my project, I released code as an open-source project.\n\nI spent quite a lot time on this app, and get no payment from it till now.\n\nBut if you like it and wants to support this collage student a cup of coffee, you can use following ways to reward me.</string>
+    <string name="alipay">Alipay</string>
+    <string name="wechatpay">WeChatPay</string>
+    <string name="paypal">PayPal</string>
+    <string name="paypal_link">http://paypal.me/AlynxZhou</string>
 </resources>

@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_margin="@dimen/card_margin"
+        android:layout_marginTop="@dimen/card_margin"
+        android:layout_marginBottom="@dimen/card_margin"
         android:elevation="3dp"
         card_view:cardCornerRadius="@dimen/card_radius">
         <LinearLayout
@@ -38,10 +39,10 @@
                     android:layout_marginEnd="@dimen/path_margin"
                     android:layout_marginBottom="@dimen/path_margin"
                     android:maxHeight="@dimen/name_height"
-                    android:scrollbars="vertical"
-                    android:scrollbarStyle="outsideOverlay"
                     android:paddingStart="@dimen/name_padding"
                     android:paddingEnd="@dimen/name_padding"
+                    android:scrollbarStyle="outsideOverlay"
+                    android:scrollbars="vertical"
                     android:textColor="@color/name"
                     android:textSize="@dimen/name_size" />
                 <TextView
@@ -51,10 +52,10 @@
                     android:layout_marginEnd="@dimen/path_margin"
                     android:layout_marginBottom="@dimen/path_margin"
                     android:maxHeight="@dimen/path_height"
-                    android:scrollbars="vertical"
-                    android:scrollbarStyle="outsideOverlay"
                     android:paddingStart="@dimen/path_padding"
                     android:paddingEnd="@dimen/path_padding"
+                    android:scrollbarStyle="outsideOverlay"
+                    android:scrollbars="vertical"
                     android:textSize="@dimen/path_size" />
                 <LinearLayout
                     android:layout_width="match_parent"
