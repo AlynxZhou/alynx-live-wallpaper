@@ -18,6 +18,8 @@ package xyz.alynx.livewallpaper;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.WallpaperManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -54,9 +56,10 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CardAdapter.OnCardClickedListener {
     private static final String TAG = "MainActivity";
     public static final int SELECT_REQUEST_CODE = 3;
+    public static final int PREVIEW_REQUEST_CODE = 7;
     private CardAdapter cardAdapter = null;
     private AlertDialog addDialog = null;
     private LayoutInflater layoutInflater = null;
@@ -70,7 +73,15 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        cardAdapter = new CardAdapter(this, LWApplication.getCards());
+        Utils.debug(TAG, "Created");
+
+        // There shouldn't be preview when activity starts.
+        if (LWApplication.isPreview()) {
+            LWApplication.setPreview(false);
+            LWApplication.setPreviewWallpaperCard(null);
+        }
+
+        cardAdapter = new CardAdapter(this, LWApplication.getCards(), this);
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -117,18 +128,25 @@ public class MainActivity extends AppCompatActivity {
                 }
                 pathEditText.setText(uri.toString());
             }
+        } else if (requestCode == PREVIEW_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                LWApplication.setCurrentWallpaperCard(LWApplication.getPreviewWallpaperCard());
+            }
+            // Don't forget to disable preview mode.
+            LWApplication.setPreview(false);
+            LWApplication.setPreviewWallpaperCard(null);
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        MenuItem toogleSlideMenu = menu.findItem(R.id.action_toggle_slide);
+        MenuItem toggleSlideMenuItem = menu.findItem(R.id.action_toggle_slide);
         SharedPreferences pref = getSharedPreferences(LWApplication.OPTIONS_PREF, MODE_PRIVATE);
         if (pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false)) {
-            toogleSlideMenu.setTitle(R.string.action_disallow_slide);
+            toggleSlideMenuItem.setTitle(R.string.action_disallow_slide);
         } else {
-            toogleSlideMenu.setTitle(R.string.action_allow_slide);
+            toggleSlideMenuItem.setTitle(R.string.action_allow_slide);
         }
         return true;
     }
@@ -136,16 +154,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
-        case R.id.action_remove:
-            cardAdapter.setRemovable(true);
-            showCancelFab();
-            break;
-        case R.id.action_about:
-            Intent intent = new Intent(this, AboutActivity.class);
-            startActivity(
-                intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
-            );
-            break;
         case R.id.action_toggle_slide:
             SharedPreferences pref = getSharedPreferences(LWApplication.OPTIONS_PREF, MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
@@ -163,6 +171,24 @@ public class MainActivity extends AppCompatActivity {
                 item.setTitle(R.string.action_allow_slide);
             }
             break;
+        case R.id.action_remove:
+            cardAdapter.setRemovable(true);
+            showCancelFab();
+            break;
+        case R.id.action_reward: {
+            Intent intent = new Intent(this, RewardActivity.class);
+            startActivity(
+                intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+            );
+            break;
+        }
+        case R.id.action_about: {
+            Intent intent = new Intent(this, AboutActivity.class);
+            startActivity(
+                intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+            );
+            break;
+        }
         default:
             break;
         }
@@ -191,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Utils.debug(TAG, "Resumed");
         List<WallpaperCard> cards = LWApplication.getCards();
         try {
             FileInputStream fis = openFileInput(LWApplication.JSON_FILE_NAME);
@@ -227,6 +254,19 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onCardClicked(WallpaperCard wallpaperCard) {
+        // When card is clicked we go to preview mode.
+        LWApplication.setPreview(true);
+        LWApplication.setPreviewWallpaperCard(wallpaperCard);
+        Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+        intent.putExtra(
+            WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+            new ComponentName(this, GLWallpaperService.class)
+        );
+        startActivityForResult(intent, PREVIEW_REQUEST_CODE);
     }
 
     private void showCancelFab() {

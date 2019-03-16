@@ -37,6 +37,8 @@ public class LWApplication extends Application {
     public static final String INTERNAL_WALLPAPER_VIDEO_PATH = "wallpapers/fire-rain/fire-rain-720x720.mp4";
     private static List<WallpaperCard> cards = null;
     private static WallpaperCard currentWallpaperCard = null;
+    private static WallpaperCard previewWallpaperCard = null;
+    private static boolean preview = false;
 
     @Override
     public void onCreate() {
@@ -66,6 +68,22 @@ public class LWApplication extends Application {
 
     public static void setCurrentWallpaperCard(WallpaperCard wallpaperCard) {
         currentWallpaperCard = wallpaperCard;
+    }
+
+    public static WallpaperCard getPreviewWallpaperCard() {
+        return previewWallpaperCard;
+    }
+
+    public static void setPreviewWallpaperCard(WallpaperCard wallpaperCard) {
+        previewWallpaperCard = wallpaperCard;
+    }
+
+    public static boolean isPreview() {
+        return preview;
+    }
+
+    public static void setPreview(boolean preview) {
+        LWApplication.preview = preview;
     }
 
     public static JSONArray getCardsJSONArray() throws JSONException {

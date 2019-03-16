@@ -16,8 +16,6 @@
 
 package xyz.alynx.livewallpaper;
 
-import android.app.WallpaperManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -37,12 +35,18 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
     private static final String TAG = "CardAdapter";
     private Context context = null;
     private List<WallpaperCard> cards = null;
+    private OnCardClickedListener listener = null;
     private boolean removable = false;
 
-    public CardAdapter(Context context, List<WallpaperCard> cards) {
+    public interface OnCardClickedListener {
+        public abstract void onCardClicked(WallpaperCard wallpaperCard);
+    }
+
+    public CardAdapter(Context context, List<WallpaperCard> cards, OnCardClickedListener listener) {
         super();
         this.context = context;
         this.cards = cards;
+        this.listener = listener;
     }
 
     @NonNull
@@ -84,15 +88,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
             @Override
             public void onClick(View view) {
                 List<WallpaperCard> cards = LWApplication.getCards();
-                LWApplication.setCurrentWallpaperCard(
-                    cards.get(cardViewHolder.getLayoutPosition())
-                );
-                Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
-                intent.putExtra(
-                    WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                    new ComponentName(view.getContext(), GLWallpaperService.class)
-                );
-                view.getContext().startActivity(intent);
+                listener.onCardClicked(cards.get(cardViewHolder.getLayoutPosition()));
             }
         });
     }

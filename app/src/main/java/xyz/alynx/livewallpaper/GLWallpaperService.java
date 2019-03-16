@@ -25,7 +25,6 @@ import android.content.res.AssetFileDescriptor;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
-import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.service.wallpaper.WallpaperService;
 import android.view.SurfaceHolder;
@@ -272,7 +271,11 @@ public class GLWallpaperService extends WallpaperService {
 
         private void loadWallpaperCard() {
             oldWallpaperCard = wallpaperCard;
-            wallpaperCard = LWApplication.getCurrentWallpaperCard();
+            if (LWApplication.isPreview()) {
+                wallpaperCard = LWApplication.getPreviewWallpaperCard();
+            } else {
+                wallpaperCard = LWApplication.getCurrentWallpaperCard();
+            }
             // If no current card, means that services started and application not start.
             // Read preference and build a temp card.
             if (wallpaperCard == null) {
@@ -293,7 +296,9 @@ public class GLWallpaperService extends WallpaperService {
                     throw new RuntimeException("Failed to fallback to internal wallpaper");
                 }
             }
-            saveWallpaperCardPreference();
+            if (!LWApplication.isPreview()) {
+                saveWallpaperCardPreference();
+            }
         }
 
         private void getVideoMetadata() throws IOException {
