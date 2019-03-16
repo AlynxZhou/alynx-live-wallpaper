@@ -25,6 +25,7 @@ import android.content.res.AssetFileDescriptor;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.service.wallpaper.WallpaperService;
 import android.view.SurfaceHolder;
@@ -191,10 +192,12 @@ public class GLWallpaperService extends WallpaperService {
             }
             ConfigurationInfo configInfo = activityManager.getDeviceConfigurationInfo();
             if (configInfo.reqGlEsVersion >= 0x30000) {
+                Utils.debug(TAG, "Support GLESv3");
                 glSurfaceView.setEGLContextClientVersion(3);
                 renderer = new GLES30WallpaperRenderer(context);
             } else if (configInfo.reqGlEsVersion >= 0x20000) {
-                glSurfaceView.setEGLContextClientVersion(3);
+                Utils.debug(TAG, "Fallback to GLESv2");
+                glSurfaceView.setEGLContextClientVersion(2);
                 renderer = new GLES20WallpaperRenderer(context);
             } else {
                 Toast.makeText(context, R.string.gles_version, Toast.LENGTH_LONG).show();
