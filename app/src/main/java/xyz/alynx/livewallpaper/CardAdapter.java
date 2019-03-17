@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2019 Alynx Zhou
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@ package xyz.alynx.livewallpaper;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
@@ -33,16 +32,20 @@ import java.util.List;
 
 public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
     private static final String TAG = "CardAdapter";
-    private Context context = null;
-    private List<WallpaperCard> cards = null;
-    private OnCardClickedListener listener = null;
+    private Context context;
+    private List<WallpaperCard> cards;
+    private OnCardClickedListener listener;
     private boolean removable = false;
 
     public interface OnCardClickedListener {
-        public abstract void onCardClicked(WallpaperCard wallpaperCard);
+        void onCardClicked(@NonNull final WallpaperCard wallpaperCard);
     }
 
-    public CardAdapter(Context context, List<WallpaperCard> cards, OnCardClickedListener listener) {
+    CardAdapter(
+        @NonNull final Context context,
+        @NonNull final List<WallpaperCard> cards,
+        @NonNull final OnCardClickedListener listener
+    ) {
         super();
         this.context = context;
         this.cards = cards;
@@ -60,7 +63,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final CardViewHolder cardViewHolder, int i) {
-        WallpaperCard card = cards.get(cardViewHolder.getLayoutPosition());
+        final WallpaperCard card = cards.get(cardViewHolder.getLayoutPosition());
         if (!card.isValid()) {
             removeCard(cardViewHolder.getLayoutPosition());
             return;
@@ -87,7 +90,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
         cardViewHolder.thumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                List<WallpaperCard> cards = LWApplication.getCards();
+                final List<WallpaperCard> cards = LWApplication.getCards();
                 listener.onCardClicked(cards.get(cardViewHolder.getLayoutPosition()));
             }
         });
@@ -98,12 +101,12 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
         return cards.size();
     }
 
-    public void addCard(int position, WallpaperCard card) {
+    void addCard(final int position, @NonNull final WallpaperCard card) {
         cards.add(position, card);
         notifyItemInserted(position);
     }
 
-    public void removeCard(int position) {
+    private void removeCard(final int position) {
         notifyItemRemoved(position);
         context.getContentResolver().releasePersistableUriPermission(
             cards.get(position).getUri(),
@@ -112,28 +115,26 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
         cards.remove(position);
     }
 
-    public void setRemovable(boolean removable) {
+    void setRemovable(final boolean removable) {
         this.removable = removable;
         notifyDataSetChanged();
     }
 
-    public boolean isRemovable() {
+    boolean isRemovable() {
         return removable;
     }
 }
 
 class CardViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = "CardViewHolder";
-    public CardView cardView = null;
-    public ImageView thumbnail = null;
-    public TextView name = null;
-    public TextView path = null;
-    public Button internal = null;
-    public Button removeButton = null;
+    ImageView thumbnail;
+    public TextView name;
+    public TextView path;
+    Button internal;
+    Button removeButton;
 
-    public CardViewHolder(View view) {
+    CardViewHolder(View view) {
         super(view);
-        cardView = view.findViewById(R.id.wallpaper_card);
         thumbnail = view.findViewById(R.id.thumbnail);
         name = view.findViewById(R.id.name);
         name.setMovementMethod(new ScrollingMovementMethod());

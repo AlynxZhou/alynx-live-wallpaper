@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2019 Alynx Zhou
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.ParcelFileDescriptor;
 import android.service.wallpaper.WallpaperService;
+import android.support.annotation.NonNull;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
@@ -68,7 +69,7 @@ public class GLWallpaperService extends WallpaperService {
     public class GLWallpaperEngine extends Engine {
         private static final String TAG = "GLWallpaperEngine";
         private static final String CURRENT_CARD_PREF = "currentWallpaperCard";
-        private Context context = null;
+        private Context context;
         private GLWallpaperSurfaceView glSurfaceView = null;
         private SimpleExoPlayer exoPlayer = null;
         private MediaSource videoSource = null;
@@ -103,7 +104,7 @@ public class GLWallpaperService extends WallpaperService {
             }
         }
 
-        public GLWallpaperEngine(Context context) {
+        GLWallpaperEngine(@NonNull final Context context) {
             this.context = context;
         }
 
@@ -146,13 +147,11 @@ public class GLWallpaperService extends WallpaperService {
                 xOffset, yOffset, xOffsetStep,
                 yOffsetStep, xPixelOffset, yPixelOffset
             );
-            SharedPreferences pref = getSharedPreferences(
+            final SharedPreferences pref = getSharedPreferences(
                 LWApplication.OPTIONS_PREF, MODE_PRIVATE
             );
             if (pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false)) {
                 renderer.setOffset(0.5f - xOffset, 0.5f - yOffset);
-            } else {
-                renderer.setOffset(0, 0);
             }
         }
 
@@ -183,13 +182,13 @@ public class GLWallpaperService extends WallpaperService {
                 glSurfaceView = null;
             }
             glSurfaceView = new GLWallpaperSurfaceView(context);
-            ActivityManager activityManager = (ActivityManager)getSystemService(
+            final ActivityManager activityManager = (ActivityManager)getSystemService(
                 Context.ACTIVITY_SERVICE
             );
             if (activityManager == null) {
                 throw new RuntimeException("Cannot get ActivityManager");
             }
-            ConfigurationInfo configInfo = activityManager.getDeviceConfigurationInfo();
+            final ConfigurationInfo configInfo = activityManager.getDeviceConfigurationInfo();
             if (configInfo.reqGlEsVersion >= 0x30000) {
                 Utils.debug(TAG, "Support GLESv3");
                 glSurfaceView.setEGLContextClientVersion(3);
@@ -209,13 +208,15 @@ public class GLWallpaperService extends WallpaperService {
         }
 
         private boolean checkWallpaperCardValid() {
-            boolean res = true;
             if (wallpaperCard.getType() == WallpaperCard.Type.INTERNAL) {
-                return res;
+                return true;
             }
+            boolean res = true;
             try {
-                ContentResolver resolver = getContentResolver();
-                ParcelFileDescriptor pfd = resolver.openFileDescriptor(wallpaperCard.getUri(), "r");
+                final ContentResolver resolver = getContentResolver();
+                final ParcelFileDescriptor pfd = resolver.openFileDescriptor(
+                    wallpaperCard.getUri(), "r"
+                );
                 if (pfd == null) {
                     res = false;
                 } else {
@@ -236,9 +237,9 @@ public class GLWallpaperService extends WallpaperService {
                 Utils.debug(TAG, "Save wallpaper card failed, wallpaper card is null");
                 return;
             }
-            SharedPreferences pref = getSharedPreferences(CURRENT_CARD_PREF, MODE_PRIVATE);
+            final SharedPreferences pref = getSharedPreferences(CURRENT_CARD_PREF, MODE_PRIVATE);
             // Save to preference.
-            SharedPreferences.Editor prefEditor = pref.edit();
+            final SharedPreferences.Editor prefEditor = pref.edit();
             prefEditor.putString("name", wallpaperCard.getName());
             prefEditor.putString("path", wallpaperCard.getPath());
             switch (wallpaperCard.getType()) {
@@ -253,20 +254,22 @@ public class GLWallpaperService extends WallpaperService {
         }
 
         private void loadWallpaperCardPreference() {
-            SharedPreferences pref = getSharedPreferences(CURRENT_CARD_PREF, MODE_PRIVATE);
+            final SharedPreferences pref = getSharedPreferences(CURRENT_CARD_PREF, MODE_PRIVATE);
             WallpaperCard.Type type = WallpaperCard.Type.EXTERNAL;
-            Uri uri = null;
+            Uri uri;
             if (Objects.equals(pref.getString("type", null), "INTERNAL")) {
                 type = WallpaperCard.Type.INTERNAL;
                 uri = Uri.parse("file:///android_asset/" + pref.getString("path", null));
             } else {
                 uri = Uri.parse(pref.getString("path", null));
             }
-            wallpaperCard = new WallpaperCard(
-                pref.getString("name", null),
-                pref.getString("path", null),
-                uri, type, null
-            );
+            final String name = pref.getString("name", null);
+            final String path = pref.getString("path", null);
+            if (name == null || path == null) {
+                wallpaperCard = null;
+                return;
+            }
+            wallpaperCard = new WallpaperCard(name, path, uri, type, null);
         }
 
         private void loadWallpaperCard() {
@@ -287,7 +290,7 @@ public class GLWallpaperService extends WallpaperService {
                 Toast.makeText(context, R.string.invalid_path, Toast.LENGTH_LONG).show();
                 wallpaperCard.setInvalid();
                 // Load default wallpaper.
-                List<WallpaperCard> cards = LWApplication.getCards();
+                final List<WallpaperCard> cards = LWApplication.getCards();
                 if (cards != null && cards.size() > 0) {
                     wallpaperCard = cards.get(0);
                 } else {
@@ -302,10 +305,10 @@ public class GLWallpaperService extends WallpaperService {
         }
 
         private void getVideoMetadata() throws IOException {
-            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            final MediaMetadataRetriever mmr = new MediaMetadataRetriever();
             switch (wallpaperCard.getType()) {
             case INTERNAL:
-                AssetFileDescriptor afd = getAssets().openFd(wallpaperCard.getPath());
+                final AssetFileDescriptor afd = getAssets().openFd(wallpaperCard.getPath());
                 mmr.setDataSource(
                     afd.getFileDescriptor(),
                     afd.getStartOffset(),
@@ -317,9 +320,15 @@ public class GLWallpaperService extends WallpaperService {
                 mmr.setDataSource(context, wallpaperCard.getUri());
                 break;
             }
-            String rotation = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
-            String width = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
-            String height = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
+            final String rotation = mmr.extractMetadata(
+                MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION
+            );
+            final String width = mmr.extractMetadata(
+                MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH
+            );
+            final String height = mmr.extractMetadata(
+                MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT
+            );
             mmr.release();
             videoRotation = Integer.parseInt(rotation);
             videoWidth = Integer.parseInt(width);
@@ -344,7 +353,7 @@ public class GLWallpaperService extends WallpaperService {
             exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
             exoPlayer.setVolume(0.0f);
             // Disable audio decoder.
-            int count = exoPlayer.getRendererCount();
+            final int count = exoPlayer.getRendererCount();
             for (int i = 0; i < count; ++i) {
                 if (exoPlayer.getRendererType(i) == C.TRACK_TYPE_AUDIO) {
                     trackSelector.setParameters(
@@ -354,7 +363,7 @@ public class GLWallpaperService extends WallpaperService {
                 }
             }
             exoPlayer.setRepeatMode(Player.REPEAT_MODE_ALL);
-            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(
+            final DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(
                 context, Util.getUserAgent(context, "xyz.alynx.livewallpaper")
             );
             // ExoPlayer can load file:///android_asset/ uri correctly.

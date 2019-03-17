@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2019 Alynx Zhou
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,13 +22,15 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
 public class RewardActivity extends AppCompatActivity {
+    private static final String TAG = "RewardActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reward);
-        Toolbar toolbar = findViewById(R.id.reward_toolbar);
+        final Toolbar toolbar = findViewById(R.id.reward_toolbar);
         setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
+        final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(R.string.action_reward);

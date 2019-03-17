@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2019 Alynx Zhou
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 
 package xyz.alynx.livewallpaper;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.WallpaperManager;
@@ -26,6 +27,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         Utils.debug(TAG, "Created");
@@ -83,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
 
         cardAdapter = new CardAdapter(this, LWApplication.getCards(), this);
 
-        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        final RecyclerView recyclerView = findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -100,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         });
 
         cancelRemoveCardFab = findViewById(R.id.cancelRemoveCardFab);
-        cancelRemoveCardFab.setVisibility(View.GONE);
+        cancelRemoveCardFab.hide();
         cancelRemoveCardFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -116,13 +118,13 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);
         if (requestCode == SELECT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            Uri uri = null;
+            Uri uri;
             if (resultData != null) {
                 uri = resultData.getData();
                 if (uri == null) {
                     return;
                 }
-                EditText pathEditText = addDialog.findViewById(R.id.path_edit_text);
+                final EditText pathEditText = addDialog.findViewById(R.id.path_edit_text);
                 if (pathEditText == null) {
                     return;
                 }
@@ -141,8 +143,10 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        MenuItem toggleSlideMenuItem = menu.findItem(R.id.action_toggle_slide);
-        SharedPreferences pref = getSharedPreferences(LWApplication.OPTIONS_PREF, MODE_PRIVATE);
+        final MenuItem toggleSlideMenuItem = menu.findItem(R.id.action_toggle_slide);
+        final SharedPreferences pref = getSharedPreferences(
+            LWApplication.OPTIONS_PREF, MODE_PRIVATE
+        );
         if (pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false)) {
             toggleSlideMenuItem.setTitle(R.string.action_disallow_slide);
         } else {
@@ -154,10 +158,12 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
-        case R.id.action_toggle_slide:
-            SharedPreferences pref = getSharedPreferences(LWApplication.OPTIONS_PREF, MODE_PRIVATE);
-            SharedPreferences.Editor editor = pref.edit();
-            boolean newValue = !pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false);
+        case R.id.action_toggle_slide: {
+            final SharedPreferences pref = getSharedPreferences(
+                LWApplication.OPTIONS_PREF, MODE_PRIVATE
+            );
+            final SharedPreferences.Editor editor = pref.edit();
+            final boolean newValue = !pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false);
             editor.putBoolean(LWApplication.SLIDE_WALLPAPER_KEY, newValue);
             editor.apply();
             if (newValue) {
@@ -171,19 +177,21 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
                 item.setTitle(R.string.action_allow_slide);
             }
             break;
-        case R.id.action_remove:
+        }
+        case R.id.action_remove: {
             cardAdapter.setRemovable(true);
             showCancelFab();
             break;
+        }
         case R.id.action_reward: {
-            Intent intent = new Intent(this, RewardActivity.class);
+            final Intent intent = new Intent(this, RewardActivity.class);
             startActivity(
                 intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
             );
             break;
         }
         case R.id.action_about: {
-            Intent intent = new Intent(this, AboutActivity.class);
+            final Intent intent = new Intent(this, AboutActivity.class);
             startActivity(
                 intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
             );
@@ -198,11 +206,10 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     @Override
     protected void onPause() {
         super.onPause();
-        WallpaperCard currentWallpaperCard = LWApplication.getCurrentWallpaperCard();
         try {
-            JSONObject json = new JSONObject();
+            final JSONObject json = new JSONObject();
             json.put("cards", LWApplication.getCardsJSONArray());
-            FileOutputStream fos = openFileOutput(LWApplication.JSON_FILE_NAME, Context.MODE_PRIVATE);
+            final FileOutputStream fos = openFileOutput(LWApplication.JSON_FILE_NAME, Context.MODE_PRIVATE);
             fos.write(json.toString(2).getBytes());
             fos.close();
         } catch (FileNotFoundException e) {
@@ -219,21 +226,24 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         super.onResume();
         Utils.debug(TAG, "Resumed");
         List<WallpaperCard> cards = LWApplication.getCards();
+        if (cards == null) {
+            return;
+        }
         try {
-            FileInputStream fis = openFileInput(LWApplication.JSON_FILE_NAME);
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fis));
-            String line = null;
-            StringBuilder stringBuilder = new StringBuilder();
+            final FileInputStream fis = openFileInput(LWApplication.JSON_FILE_NAME);
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fis));
+            String line;
+            final StringBuilder stringBuilder = new StringBuilder();
             while ((line = bufferedReader.readLine()) != null) {
                 stringBuilder.append(line);
                 stringBuilder.append('\n');
             }
-            String jsonSource = stringBuilder.toString();
-            JSONObject json = new JSONObject(jsonSource);
-            JSONArray cardsArray = json.getJSONArray("cards");
+            final String jsonSource = stringBuilder.toString();
+            final JSONObject json = new JSONObject(jsonSource);
+            final JSONArray cardsArray = json.getJSONArray("cards");
             for (int i = 0; i < cardsArray.length(); ++i) {
-                String name = cardsArray.getJSONObject(i).getString("name");
-                String path = cardsArray.getJSONObject(i).getString("path");
+                final String name = cardsArray.getJSONObject(i).getString("name");
+                final String path = cardsArray.getJSONObject(i).getString("path");
                 boolean found = false;
                 for (WallpaperCard card : cards) {
                     if (Objects.equals(card.getPath(), path)) {
@@ -257,11 +267,11 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     }
 
     @Override
-    public void onCardClicked(WallpaperCard wallpaperCard) {
+    public void onCardClicked(@NonNull final WallpaperCard wallpaperCard) {
         // When card is clicked we go to preview mode.
         LWApplication.setPreview(true);
         LWApplication.setPreviewWallpaperCard(wallpaperCard);
-        Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+        final Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
         intent.putExtra(
             WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
             new ComponentName(this, GLWallpaperService.class)
@@ -270,25 +280,18 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     }
 
     private void showCancelFab() {
-        Animation scaleDown = AnimationUtils.loadAnimation(this, R.anim.scale_down);
-        addCardFab.startAnimation(scaleDown);
-        addCardFab.setVisibility(View.GONE);
-        cancelRemoveCardFab.setVisibility(View.VISIBLE);
-        Animation scaleUp = AnimationUtils.loadAnimation(this, R.anim.scale_up);
-        cancelRemoveCardFab.startAnimation(scaleUp);
+        addCardFab.hide();
+        cancelRemoveCardFab.show();
     }
 
     private void hideCancelFab() {
-        Animation scaleDown = AnimationUtils.loadAnimation(this, R.anim.scale_down);
-        cancelRemoveCardFab.startAnimation(scaleDown);
-        cancelRemoveCardFab.setVisibility(View.GONE);
-        addCardFab.setVisibility(View.VISIBLE);
-        Animation scaleUp = AnimationUtils.loadAnimation(this, R.anim.scale_up);
-        addCardFab.startAnimation(scaleUp);
+        cancelRemoveCardFab.hide();
+        addCardFab.show();
     }
 
+    @SuppressLint("InflateParams")
     private void createAddDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.add_wallpaper);
         builder.setView(layoutInflater.inflate(R.layout.add_wallpaper_dialog, null));
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -303,14 +306,14 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         });
         addDialog = builder.create();
         addDialog.show();
-        Button button = addDialog.findViewById(R.id.choose_file_button);
+        final Button button = addDialog.findViewById(R.id.choose_file_button);
         if (button == null) {
             return;
         }
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 // Without those flags some phone won't let you read, for example Huawei.
                 intent.addFlags(
                     Intent.FLAG_GRANT_READ_URI_PERMISSION |
@@ -325,13 +328,13 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     }
 
     private void onAddCardConfirmed() {
-        EditText nameEditText = addDialog.findViewById(R.id.name_edit_text);
-        EditText pathEditText = addDialog.findViewById(R.id.path_edit_text);
+        final EditText nameEditText = addDialog.findViewById(R.id.name_edit_text);
+        final EditText pathEditText = addDialog.findViewById(R.id.path_edit_text);
         if (nameEditText == null || pathEditText == null) {
             return;
         }
-        String name = nameEditText.getText().toString();
-        String path = pathEditText.getText().toString();
+        final String name = nameEditText.getText().toString();
+        final String path = pathEditText.getText().toString();
         if (name.length() == 0 || path.length() == 0) {
             Snackbar.make(
                 findViewById(R.id.coordinator_layout),
@@ -343,7 +346,7 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         runAddCardTask(name, path);
     }
 
-    private void runAddCardTask(String name, String path) {
+    private void runAddCardTask(@NonNull String name, @NonNull String path) {
         new AddCardTask(this, new AddCardTask.AddCardTaskListener() {
             @Override
             public void onPreExecute(String message) {

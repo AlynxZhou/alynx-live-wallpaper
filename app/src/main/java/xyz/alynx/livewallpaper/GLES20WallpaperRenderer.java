@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2019 Alynx Zhou
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,7 @@ import android.graphics.SurfaceTexture;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import android.support.annotation.NonNull;
 import android.view.Surface;
 
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -29,21 +30,22 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Locale;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
     private static final String TAG = "GLES20WallpaperRenderer";
-    private final int BYTES_PER_FLOAT = 4;
-    private final int BYTES_PER_INT = 4;
-    private FloatBuffer vertices = null;
-    private FloatBuffer texCoords = null;
-    private IntBuffer indices = null;
-    private float[] mvp = null;
+    private static final int BYTES_PER_FLOAT = 4;
+    private static final int BYTES_PER_INT = 4;
+    private FloatBuffer vertices;
+    private FloatBuffer texCoords;
+    private IntBuffer indices;
+    private float[] mvp;
     private int program = 0;
     private int mvpLocation = 0;
-    private int[] textures = null;
+    private int[] textures;
     private SurfaceTexture surfaceTexture = null;
     private int screenWidth = 0;
     private int screenHeight = 0;
@@ -56,13 +58,11 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
     private long updatedFrame = 0;
     private long renderedFrame = 0;
 
-    public GLES20WallpaperRenderer(Context context) {
+    GLES20WallpaperRenderer(@NonNull final Context context) {
         super(context);
-        updatedFrame = 0;
-        renderedFrame = 0;
 
         // Those replaced glGenBuffers() and glBufferData().
-        float[] vertexArray = {
+        final float[] vertexArray = {
             // x, y
             // bottom left
             -1.0f, -1.0f,
@@ -78,7 +78,7 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
         ).order(ByteOrder.nativeOrder()).asFloatBuffer();
         vertices.put(vertexArray).position(0);
 
-        float[] texCoordArray = {
+        final float[] texCoordArray = {
             // u, v
             // bottom left
             0.0f, 1.0f,
@@ -94,7 +94,7 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
         ).order(ByteOrder.nativeOrder()).asFloatBuffer();
         texCoords.put(texCoordArray).position(0);
 
-        int[] indexArray = {
+        final int[] indexArray = {
             0, 1, 2,
             3, 2, 1
         };
@@ -195,7 +195,7 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
     }
 
     @Override
-    public void setSourcePlayer(SimpleExoPlayer exoPlayer) {
+    public void setSourcePlayer(@NonNull final SimpleExoPlayer exoPlayer) {
         // Re-create SurfaceTexture when getting a new player.
         // Because maybe a new video is loaded.
         createSurfaceTexture();
@@ -207,7 +207,9 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
         if (screenWidth != width || screenHeight != height) {
             screenWidth = width;
             screenHeight = height;
-            Utils.debug(TAG, String.format("Set screen size to %dx%d", screenWidth, screenHeight));
+            Utils.debug(TAG, String.format(
+                Locale.US, "Set screen size to %dx%d", screenWidth, screenHeight
+            ));
             updateMatrix();
         }
     }
@@ -217,7 +219,7 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
         // MediaMetadataRetriever always give us raw width and height and won't rotate them.
         // So we rotate them by ourselves.
         if (rotation % 180 != 0) {
-            int swap = width;
+            final int swap = width;
             width = height;
             height = swap;
         }
@@ -225,18 +227,22 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
             videoWidth = width;
             videoHeight = height;
             videoRotation = rotation;
-            Utils.debug(TAG, String.format("Set video size to %dx%d", videoWidth, videoHeight));
-            Utils.debug(TAG, String.format("Set video rotation to %d", videoRotation));
+            Utils.debug(TAG, String.format(
+                Locale.US, "Set video size to %dx%d", videoWidth, videoHeight
+            ));
+            Utils.debug(TAG, String.format(
+                Locale.US, "Set video rotation to %d", videoRotation
+            ));
             updateMatrix();
         }
     }
 
     @Override
     public void setOffset(float xOffset, float yOffset) {
-        float maxXOffset = (1.0f - (
+        final float maxXOffset = (1.0f - (
             (float)screenWidth / screenHeight) / ((float)videoWidth / videoHeight)
         ) / 2;
-        float maxYOffset = (1.0f - (
+        final float maxYOffset = (1.0f - (
             (float)screenHeight / screenWidth) / ((float)videoHeight / videoWidth)
         ) / 2;
         if (xOffset > maxXOffset) {
@@ -254,7 +260,9 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
         if (this.xOffset != xOffset || this.yOffset != yOffset) {
             this.xOffset = xOffset;
             this.yOffset = yOffset;
-            Utils.debug(TAG, String.format("Set offset to %fx%f", this.xOffset, this.yOffset));
+            Utils.debug(TAG, String.format(
+                Locale.US, "Set offset to %fx%f", this.xOffset, this.yOffset
+            ));
             updateMatrix();
         }
     }
@@ -284,8 +292,8 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
         }
         mvp[0] = mvp[5] = mvp[10] = mvp[15] = 1.0f;
         // OpenGL model matrix: scaling, rotating, translating.
-        float videoRatio = (float)videoWidth / videoHeight;
-        float screenRatio = (float)screenWidth / screenHeight;
+        final float videoRatio = (float)videoWidth / videoHeight;
+        final float screenRatio = (float)screenWidth / screenHeight;
         if (videoRatio >= screenRatio) {
             Utils.debug(TAG, "X-cropping");
             // Treat video and screen width as 1, and compare width to scale.

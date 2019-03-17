@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2019 Alynx Zhou
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@ package xyz.alynx.livewallpaper;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,19 +33,26 @@ import java.util.Objects;
 
 public class WallpaperCard {
     private static final String TAG = "WallpaperCard";
-    // INTERNAL means this video is bundled into app assets.
-    // So it cannot be removed.
-    public enum Type {INTERNAL, EXTERNAL};
-    private String name = null;
+    private String name;
     // It's hard to access file path with Android built-in file chooser.
     // So actually path is a path.
-    private String path = null;
-    private Uri uri = null;
-    private Bitmap thumbnail = null;
+    private String path;
+    private Uri uri;
+    private Bitmap thumbnail;
     private boolean valid = true;
-    private Type type = Type.EXTERNAL;
+    private Type type;
 
-    public WallpaperCard(String name, String path, Uri uri, Type type, Bitmap thumbnail) {
+    // INTERNAL means this video is bundled into app assets.
+    // So it cannot be removed.
+    public enum Type {INTERNAL, EXTERNAL}
+
+    WallpaperCard(
+        @NonNull final String name,
+        @NonNull final String path,
+        @NonNull final Uri uri,
+        @NonNull final Type type,
+        final Bitmap thumbnail
+    ) {
         setName(name);
         setPath(path);
         setUri(uri);
@@ -52,41 +60,44 @@ public class WallpaperCard {
         this.thumbnail = thumbnail;
     }
 
+    @NonNull
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(@NonNull final String name) {
         this.name = name;
     }
 
+    @NonNull
     public String getPath() {
         return path;
     }
 
-    public void setPath(String path) {
+    public void setPath(@NonNull final String path) {
         this.path = path;
     }
 
-    public Uri getUri() {
+    @NonNull
+    Uri getUri() {
         return uri;
     }
 
-    public void setUri(Uri uri) {
+    private void setUri(@NonNull final Uri uri) {
         this.uri = uri;
     }
 
-    public Bitmap getThumbnail() {
+    Bitmap getThumbnail() {
         return thumbnail;
     }
 
     /**
-     * @param card
+     * @param card WallpaperCard to compare.
      * @return boolean true for equal, false for not.
      *
      * Only compare path, other parts are not matter.
      */
-    public boolean equals(WallpaperCard card) {
+    boolean equals(final WallpaperCard card) {
         return Objects.equals(getPath(), card.getPath());
     }
 
@@ -95,7 +106,7 @@ public class WallpaperCard {
      *
      * Only EXTERNAL wallpaper can be removed.
      */
-    public boolean isRemovable() {
+    boolean isRemovable() {
         return type == Type.EXTERNAL;
     }
 
@@ -104,24 +115,25 @@ public class WallpaperCard {
      *
      * Compare this to LWApplication's currentWallpaperCard.
      */
-    public boolean isCurrent() {
+    boolean isCurrent() {
         return LWApplication.getCurrentWallpaperCard() != null &&
             equals(LWApplication.getCurrentWallpaperCard());
     }
 
-    public boolean isValid() {
+    boolean isValid() {
         return valid;
     }
 
-    public void setInvalid () {
+    void setInvalid () {
         valid = false;
     }
 
-    public Type getType() {
+    @NonNull
+    Type getType() {
         return type;
     }
 
-    public JSONObject toJSON() throws JSONException {
+    JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
         json.put("name", getName());
         json.put("path", getPath());

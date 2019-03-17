@@ -2,7 +2,7 @@
 
 // Some Android phone driver needs to put pre-processor in the first line. (e.g. Huawei Kirin)
 
-/**
+/*
  * Copyright 2019 Alynx Zhou
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

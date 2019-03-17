@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2019 Alynx Zhou
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +66,7 @@ public class LWApplication extends Application {
         return currentWallpaperCard;
     }
 
-    public static void setCurrentWallpaperCard(WallpaperCard wallpaperCard) {
+    public static void setCurrentWallpaperCard(final WallpaperCard wallpaperCard) {
         currentWallpaperCard = wallpaperCard;
     }
 
@@ -74,7 +74,7 @@ public class LWApplication extends Application {
         return previewWallpaperCard;
     }
 
-    public static void setPreviewWallpaperCard(WallpaperCard wallpaperCard) {
+    public static void setPreviewWallpaperCard(final WallpaperCard wallpaperCard) {
         previewWallpaperCard = wallpaperCard;
     }
 
@@ -82,16 +82,18 @@ public class LWApplication extends Application {
         return preview;
     }
 
-    public static void setPreview(boolean preview) {
+    public static void setPreview(final boolean preview) {
         LWApplication.preview = preview;
     }
 
     public static JSONArray getCardsJSONArray() throws JSONException {
         JSONArray jsonArray = new JSONArray();
-        for (WallpaperCard card : cards) {
-            // INTERNAL WallpaperCard don't need to save.
-            if (card.getType() != WallpaperCard.Type.INTERNAL) {
-                jsonArray.put(card.toJSON());
+        if (cards != null) {
+            for (WallpaperCard card : cards) {
+                // INTERNAL WallpaperCard don't need to save.
+                if (card.getType() != WallpaperCard.Type.INTERNAL) {
+                    jsonArray.put(card.toJSON());
+                }
             }
         }
         return jsonArray;

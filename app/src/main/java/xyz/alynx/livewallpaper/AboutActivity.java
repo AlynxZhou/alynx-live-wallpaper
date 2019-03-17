@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2019 Alynx Zhou
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,20 +24,22 @@ import android.text.method.ScrollingMovementMethod;
 import android.widget.TextView;
 
 public class AboutActivity extends AppCompatActivity {
+    private static final String TAG = "AboutActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
-        Toolbar toolbar = findViewById(R.id.about_toolbar);
+        final Toolbar toolbar = findViewById(R.id.about_toolbar);
         setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
+        final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(R.string.action_about);
         }
-        TextView appDetail = findViewById(R.id.app_detail);
+        final TextView appDetail = findViewById(R.id.app_detail);
         appDetail.setMovementMethod(new ScrollingMovementMethod());
-        TextView appVersion = findViewById(R.id.app_version);
+        final TextView appVersion = findViewById(R.id.app_version);
         appVersion.setText(String.format(
             getResources().getText(R.string.app_version).toString(),
             BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.BUILD_TYPE
