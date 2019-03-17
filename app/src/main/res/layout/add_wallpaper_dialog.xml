@@ -1,43 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="20dp">
-    <TextView
-        android:id="@+id/name_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/name" />
-    <EditText
-        android:id="@+id/name_edit_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/enter_wallpaper_name"
-        android:inputType="textPersonName" />
-    <TextView
-        android:id="@+id/path_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/path" />
+    android:scrollbarStyle="outsideOverlay"
+    android:scrollbars="vertical">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:padding="@dimen/dialog_padding">
+        <TextView
+            android:id="@+id/name_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/name" />
         <EditText
-            android:id="@+id/path_edit_text"
-            android:layout_width="wrap_content"
+            android:id="@+id/name_edit_text"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:focusable="false"
-            android:inputType="textUri"
-            android:text="" />
-        <Button
-            android:id="@+id/choose_file_button"
-            android:layout_width="wrap_content"
+            android:hint="@string/enter_wallpaper_name"
+            android:inputType="textPersonName" />
+        <TextView
+            android:id="@+id/path_text_view"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/choose_file" />
+            android:text="@string/path" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/path_edit_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:focusable="false"
+                android:inputType="textUri"
+                android:text="" />
+            <Button
+                android:id="@+id/choose_file_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/choose_file" />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</ScrollView>

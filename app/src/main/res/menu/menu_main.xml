@@ -14,6 +14,11 @@
         android:title="@string/action_remove"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_tips"
+        android:orderInCategory="100"
+        android:title="@string/action_tips"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_reward"
         android:orderInCategory="100"
         android:title="@string/action_reward"

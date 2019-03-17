@@ -28,10 +28,10 @@
     <dimen name="content_margin">16dp</dimen>
     <dimen name="app_detail_padding">15dp</dimen>
     <dimen name="app_author_link_size">18sp</dimen>
-    <dimen name="app_detail_height">300dp</dimen>
     <dimen name="app_version_size">15sp</dimen>
     <dimen name="support_author_size">30sp</dimen>
     <dimen name="reward_text_size">20sp</dimen>
     <dimen name="reward_image_margin">30dp</dimen>
     <dimen name="reward_text_margin">15dp</dimen>
+    <dimen name="dialog_padding">20dp</dimen>
 </resources>

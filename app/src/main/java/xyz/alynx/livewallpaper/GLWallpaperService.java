@@ -150,7 +150,8 @@ public class GLWallpaperService extends WallpaperService {
             final SharedPreferences pref = getSharedPreferences(
                 LWApplication.OPTIONS_PREF, MODE_PRIVATE
             );
-            if (pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false)) {
+            if (pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false) &&
+                !LWApplication.isPreview()) {
                 renderer.setOffset(0.5f - xOffset, 0.5f - yOffset);
             }
         }

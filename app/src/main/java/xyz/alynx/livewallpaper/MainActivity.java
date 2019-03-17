@@ -40,8 +40,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -60,6 +58,8 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements CardAdapter.OnCardClickedListener {
     private static final String TAG = "MainActivity";
+    private static final String FIRST_START_PREF = "firstStartPref";
+    private static final String SHOWED_TIPS_KEY = "showedTipsKey";
     public static final int SELECT_REQUEST_CODE = 3;
     public static final int PREVIEW_REQUEST_CODE = 7;
     private CardAdapter cardAdapter = null;
@@ -83,6 +83,15 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             LWApplication.setPreviewWallpaperCard(null);
         }
 
+        layoutInflater = getLayoutInflater();
+
+        final SharedPreferences pref = getSharedPreferences(
+            FIRST_START_PREF, MODE_PRIVATE
+        );
+        if (!pref.getBoolean(SHOWED_TIPS_KEY, false)) {
+            createTipsDialog();
+        }
+
         cardAdapter = new CardAdapter(this, LWApplication.getCards(), this);
 
         final RecyclerView recyclerView = findViewById(R.id.recycler_view);
@@ -90,8 +99,6 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(cardAdapter);
-
-        layoutInflater = getLayoutInflater();
 
         addCardFab = findViewById(R.id.addCardFab);
         addCardFab.setOnClickListener(new View.OnClickListener() {
@@ -181,6 +188,10 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         case R.id.action_remove: {
             cardAdapter.setRemovable(true);
             showCancelFab();
+            break;
+        }
+        case R.id.action_tips: {
+            createTipsDialog();
             break;
         }
         case R.id.action_reward: {
@@ -325,6 +336,27 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
                 startActivityForResult(intent, SELECT_REQUEST_CODE);
             }
         });
+    }
+
+    @SuppressLint("InflateParams")
+    private void createTipsDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.action_tips);
+        builder.setView(layoutInflater.inflate(R.layout.tips_dialog, null));
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                final SharedPreferences pref = getSharedPreferences(
+                    FIRST_START_PREF, MODE_PRIVATE
+                );
+                final SharedPreferences.Editor prefEditor = pref.edit();
+                if (!pref.getBoolean(SHOWED_TIPS_KEY, false)) {
+                    prefEditor.putBoolean(SHOWED_TIPS_KEY, true);
+                }
+                prefEditor.apply();
+            }
+        });
+        addDialog = builder.create();
+        addDialog.show();
     }
 
     private void onAddCardConfirmed() {

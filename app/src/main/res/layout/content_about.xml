@@ -62,31 +62,40 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/app_author" />
-    <TextView
-        android:id="@+id/app_detail"
+    <ScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="0dp"
-        android:layout_height="@dimen/app_detail_height"
+        android:layout_height="0dp"
         android:layout_marginStart="@dimen/content_margin"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="@dimen/content_margin"
-        android:autoLink="web"
-        android:maxHeight="@dimen/app_detail_height"
-        android:paddingStart="@dimen/app_detail_padding"
-        android:paddingEnd="@dimen/app_detail_padding"
+        android:layout_marginBottom="16dp"
         android:scrollbarStyle="outsideOverlay"
         android:scrollbars="vertical"
-        android:text="@string/app_detail"
-        android:textAlignment="viewStart"
-        android:textSize="@dimen/app_detail_size"
+        app:layout_constraintBottom_toTopOf="@+id/app_link"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/app_author_link" />
+        app:layout_constraintTop_toBottomOf="@+id/app_author_link">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/app_detail_padding">
+            <TextView
+                android:id="@+id/app_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autoLink="web"
+                android:text="@string/app_detail"
+                android:textAlignment="viewStart"
+                android:textSize="@dimen/app_detail_size" />
+        </LinearLayout>
+    </ScrollView>
     <TextView
         android:id="@+id/app_link"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/content_margin"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="@dimen/content_margin"
         android:layout_marginBottom="64dp"
         android:autoLink="web"
@@ -94,6 +103,5 @@
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/app_detail" />
+        app:layout_constraintStart_toStartOf="parent" />
 </android.support.constraint.ConstraintLayout>

@@ -29,7 +29,7 @@
         android:layout_marginStart="@dimen/content_margin"
         android:layout_marginTop="@dimen/content_margin"
         android:layout_marginEnd="@dimen/content_margin"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/content_margin"
         android:scrollbarStyle="outsideOverlay"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"

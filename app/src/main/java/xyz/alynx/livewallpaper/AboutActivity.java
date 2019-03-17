@@ -20,7 +20,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.method.ScrollingMovementMethod;
 import android.widget.TextView;
 
 public class AboutActivity extends AppCompatActivity {
@@ -37,8 +36,6 @@ public class AboutActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(R.string.action_about);
         }
-        final TextView appDetail = findViewById(R.id.app_detail);
-        appDetail.setMovementMethod(new ScrollingMovementMethod());
         final TextView appVersion = findViewById(R.id.app_version);
         appVersion.setText(String.format(
             getResources().getText(R.string.app_version).toString(),
