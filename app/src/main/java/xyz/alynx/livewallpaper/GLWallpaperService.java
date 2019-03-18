@@ -133,11 +133,17 @@ public class GLWallpaperService extends WallpaperService {
             super.onVisibilityChanged(visible);
             if (renderer != null) {
                 if (visible) {
+                    final SharedPreferences pref = getSharedPreferences(
+                        LWApplication.OPTIONS_PREF, MODE_PRIVATE
+                    );
+                    allowSlide = pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false);
                     startPlayer();
                     glSurfaceView.onResume();
                 } else {
                     glSurfaceView.onPause();
                     stopPlayer();
+                    // Prevent useless renderer calculating.
+                    allowSlide = false;
                 }
             }
         }
