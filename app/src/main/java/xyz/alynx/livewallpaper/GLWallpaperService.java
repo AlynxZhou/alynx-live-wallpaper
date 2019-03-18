@@ -19,6 +19,7 @@ package xyz.alynx.livewallpaper;
 import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
 import android.content.res.AssetFileDescriptor;
@@ -223,6 +224,10 @@ public class GLWallpaperService extends WallpaperService {
                 return true;
             }
             boolean res = true;
+            // Ask persistable permission here because AddCardTask may not have context.
+            getContentResolver().takePersistableUriPermission(
+                wallpaperCard.getUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION
+            );
             try {
                 final ContentResolver resolver = getContentResolver();
                 final ParcelFileDescriptor pfd = resolver.openFileDescriptor(
@@ -303,9 +308,8 @@ public class GLWallpaperService extends WallpaperService {
                 }
                 // Load default wallpaper.
                 final List<WallpaperCard> cards = LWApplication.getCards();
-                if (cards != null && cards.size() > 0) {
+                if (cards != null && cards.size() > 0 && cards.get(0) != null) {
                     wallpaperCard = cards.get(0);
-                    LWApplication.setCurrentWallpaperCard(wallpaperCard);
                 } else {
                     wallpaperCard = null;
                     Toast.makeText(context, R.string.default_failed, Toast.LENGTH_LONG).show();
@@ -313,6 +317,9 @@ public class GLWallpaperService extends WallpaperService {
                 }
             }
             if (!isPreview()) {
+                if (wallpaperCard != null) {
+                    LWApplication.setCurrentWallpaperCard(wallpaperCard);
+                }
                 saveWallpaperCardPreference();
             }
         }

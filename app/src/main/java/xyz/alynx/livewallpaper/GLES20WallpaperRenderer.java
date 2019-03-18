@@ -182,9 +182,9 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
         if (renderedFrame < updatedFrame) {
             surfaceTexture.updateTexImage();
             ++renderedFrame;
-            Utils.debug(
-                TAG, "renderedFrame: " + renderedFrame + " updatedFrame: " + updatedFrame
-            );
+            // Utils.debug(
+            //     TAG, "renderedFrame: " + renderedFrame + " updatedFrame: " + updatedFrame
+            // );
         }
 
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
