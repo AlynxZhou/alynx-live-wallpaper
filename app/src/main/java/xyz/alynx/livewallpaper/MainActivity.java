@@ -77,12 +77,6 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
 
         Utils.debug(TAG, "Created");
 
-        // There shouldn't be preview when activity starts.
-        if (LWApplication.isPreview()) {
-            LWApplication.setPreview(false);
-            LWApplication.setPreviewWallpaperCard(null);
-        }
-
         layoutInflater = getLayoutInflater();
 
         final SharedPreferences pref = getSharedPreferences(
@@ -141,8 +135,7 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             if (resultCode == Activity.RESULT_OK) {
                 LWApplication.setCurrentWallpaperCard(LWApplication.getPreviewWallpaperCard());
             }
-            // Don't forget to disable preview mode.
-            LWApplication.setPreview(false);
+            // Don't forget to delete preview card.
             LWApplication.setPreviewWallpaperCard(null);
         }
     }
@@ -280,7 +273,6 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     @Override
     public void onCardClicked(@NonNull final WallpaperCard wallpaperCard) {
         // When card is clicked we go to preview mode.
-        LWApplication.setPreview(true);
         LWApplication.setPreviewWallpaperCard(wallpaperCard);
         final Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
         intent.putExtra(

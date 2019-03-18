@@ -77,6 +77,7 @@ public class GLWallpaperService extends WallpaperService {
         private WallpaperCard wallpaperCard = null;
         private WallpaperCard oldWallpaperCard = null;
         private GLWallpaperRenderer renderer = null;
+        private boolean allowSlide = false;
         private int videoRotation = 0;
         private int videoWidth = 0;
         private int videoHeight = 0;
@@ -111,6 +112,10 @@ public class GLWallpaperService extends WallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
+            final SharedPreferences pref = getSharedPreferences(
+                LWApplication.OPTIONS_PREF, MODE_PRIVATE
+            );
+            allowSlide = pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false);
         }
 
         @Override
@@ -147,11 +152,7 @@ public class GLWallpaperService extends WallpaperService {
                 xOffset, yOffset, xOffsetStep,
                 yOffsetStep, xPixelOffset, yPixelOffset
             );
-            final SharedPreferences pref = getSharedPreferences(
-                LWApplication.OPTIONS_PREF, MODE_PRIVATE
-            );
-            if (pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false) &&
-                !LWApplication.isPreview()) {
+            if (allowSlide && isPreview()) {
                 renderer.setOffset(0.5f - xOffset, 0.5f - yOffset);
             }
         }
@@ -275,7 +276,7 @@ public class GLWallpaperService extends WallpaperService {
 
         private void loadWallpaperCard() {
             oldWallpaperCard = wallpaperCard;
-            if (LWApplication.isPreview()) {
+            if (isPreview()) {
                 wallpaperCard = LWApplication.getPreviewWallpaperCard();
             } else {
                 wallpaperCard = LWApplication.getCurrentWallpaperCard();
@@ -300,7 +301,7 @@ public class GLWallpaperService extends WallpaperService {
                     throw new RuntimeException("Failed to fallback to internal wallpaper");
                 }
             }
-            if (!LWApplication.isPreview()) {
+            if (!isPreview()) {
                 saveWallpaperCardPreference();
             }
         }

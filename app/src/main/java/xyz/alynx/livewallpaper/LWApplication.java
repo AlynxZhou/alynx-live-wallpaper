@@ -38,7 +38,6 @@ public class LWApplication extends Application {
     private static List<WallpaperCard> cards = null;
     private static WallpaperCard currentWallpaperCard = null;
     private static WallpaperCard previewWallpaperCard = null;
-    private static boolean preview = false;
 
     @Override
     public void onCreate() {
@@ -76,14 +75,6 @@ public class LWApplication extends Application {
 
     public static void setPreviewWallpaperCard(final WallpaperCard wallpaperCard) {
         previewWallpaperCard = wallpaperCard;
-    }
-
-    public static boolean isPreview() {
-        return preview;
-    }
-
-    public static void setPreview(final boolean preview) {
-        LWApplication.preview = preview;
     }
 
     public static JSONArray getCardsJSONArray() throws JSONException {
