@@ -279,6 +279,14 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
             new ComponentName(this, GLWallpaperService.class)
         );
+        // There is a problem, that after you choose "Set to desktop (and lock screen)",
+        // the preview activity does not back to MainActivity directly,
+        // instead, it backs to desktop and then back to MainActivity (very quick, invisible),
+        // and in this time GLWallpaperService starts with no LWApplication.currentWallpaperCard,
+        // no record in SharedPreference if you run app for the first time.
+        // To solve this, we let it fallback to internal wallpaper when it gets null from record,
+        // and because it will be back to MainActivity very quick,
+        // currentWallpaperCard will be set after that, and you'll see it next desktop appearing.
         startActivityForResult(intent, PREVIEW_REQUEST_CODE);
     }
 

@@ -152,7 +152,7 @@ public class GLWallpaperService extends WallpaperService {
                 xOffset, yOffset, xOffsetStep,
                 yOffsetStep, xPixelOffset, yPixelOffset
             );
-            if (allowSlide && isPreview()) {
+            if (allowSlide && !isPreview()) {
                 renderer.setOffset(0.5f - xOffset, 0.5f - yOffset);
             }
         }
@@ -210,6 +210,9 @@ public class GLWallpaperService extends WallpaperService {
         }
 
         private boolean checkWallpaperCardValid() {
+            if (wallpaperCard == null) {
+                return false;
+            }
             if (wallpaperCard.getType() == WallpaperCard.Type.INTERNAL) {
                 return true;
             }
@@ -257,19 +260,19 @@ public class GLWallpaperService extends WallpaperService {
 
         private void loadWallpaperCardPreference() {
             final SharedPreferences pref = getSharedPreferences(CURRENT_CARD_PREF, MODE_PRIVATE);
-            WallpaperCard.Type type = WallpaperCard.Type.EXTERNAL;
-            Uri uri;
-            if (Objects.equals(pref.getString("type", null), "INTERNAL")) {
-                type = WallpaperCard.Type.INTERNAL;
-                uri = Uri.parse("file:///android_asset/" + pref.getString("path", null));
-            } else {
-                uri = Uri.parse(pref.getString("path", null));
-            }
             final String name = pref.getString("name", null);
             final String path = pref.getString("path", null);
             if (name == null || path == null) {
                 wallpaperCard = null;
                 return;
+            }
+            WallpaperCard.Type type = WallpaperCard.Type.EXTERNAL;
+            Uri uri;
+            if (Objects.equals(pref.getString("type", null), "INTERNAL")) {
+                type = WallpaperCard.Type.INTERNAL;
+                uri = Uri.parse("file:///android_asset/" + path);
+            } else {
+                uri = Uri.parse(path);
             }
             wallpaperCard = new WallpaperCard(name, path, uri, type, null);
         }
@@ -285,16 +288,18 @@ public class GLWallpaperService extends WallpaperService {
             // Read preference and build a temp card.
             if (wallpaperCard == null) {
                 loadWallpaperCardPreference();
-                LWApplication.setCurrentWallpaperCard(wallpaperCard);
             }
             if (!checkWallpaperCardValid()) {
-                // File is removed by user.
-                Toast.makeText(context, R.string.invalid_path, Toast.LENGTH_LONG).show();
-                wallpaperCard.setInvalid();
+                if (wallpaperCard != null) {
+                    // File is removed by user.
+                    Toast.makeText(context, R.string.invalid_path, Toast.LENGTH_LONG).show();
+                    wallpaperCard.setInvalid();
+                }
                 // Load default wallpaper.
                 final List<WallpaperCard> cards = LWApplication.getCards();
                 if (cards != null && cards.size() > 0) {
                     wallpaperCard = cards.get(0);
+                    LWApplication.setCurrentWallpaperCard(wallpaperCard);
                 } else {
                     wallpaperCard = null;
                     Toast.makeText(context, R.string.default_failed, Toast.LENGTH_LONG).show();
@@ -344,6 +349,10 @@ public class GLWallpaperService extends WallpaperService {
             }
             Utils.debug(TAG, "Player starting");
             loadWallpaperCard();
+            if (wallpaperCard == null) {
+                // gg
+                return;
+            }
             try {
                 getVideoMetadata();
             } catch (IOException e) {
