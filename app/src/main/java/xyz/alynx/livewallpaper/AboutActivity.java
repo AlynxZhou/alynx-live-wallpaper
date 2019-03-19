@@ -38,7 +38,7 @@ public class AboutActivity extends AppCompatActivity {
         }
         final TextView appVersion = findViewById(R.id.app_version);
         appVersion.setText(String.format(
-            getResources().getText(R.string.app_version).toString(),
+            getResources().getString(R.string.app_version),
             BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.BUILD_TYPE
         ));
     }

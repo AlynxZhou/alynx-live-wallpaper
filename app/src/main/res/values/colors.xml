@@ -7,6 +7,8 @@
     <color name="cancelFab">#0ecfa7</color>
     <color name="viewBg">#f1f5f8</color>
     <color name="name">#4c4c4c</color>
+    <color name="tips">#5d5d5d</color>
     <color name="internal">#0077cd</color>
     <color name="deleteButton">#cd2335</color>
+    <color name="useButton">#238967</color>
 </resources>

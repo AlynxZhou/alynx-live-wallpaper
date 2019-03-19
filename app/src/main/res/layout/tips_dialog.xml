@@ -13,6 +13,8 @@
             android:id="@+id/tips_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/tips"
+            android:textSize="@dimen/tips_text_size"
             android:text="@string/tips_content" />
     </LinearLayout>
 </ScrollView>

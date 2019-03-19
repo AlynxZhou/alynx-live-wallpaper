@@ -49,7 +49,7 @@ public class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
         super.onPreExecute();
         if (activityRef.get() != null) {
             listener.onPreExecute(
-                activityRef.get().getResources().getText(R.string.adding_wallpaper).toString()
+                activityRef.get().getResources().getString(R.string.adding_wallpaper)
             );
         }
     }
@@ -66,8 +66,7 @@ public class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
             if (Objects.equals(card.getPath(), path)) {
                 if (activityRef.get() != null) {
                     message = String.format(
-                        activityRef.get().getResources()
-                            .getText(R.string.same_wallpaper).toString(),
+                        activityRef.get().getResources().getString(R.string.same_wallpaper),
                         name, card.getName()
                     );
                 }
@@ -82,12 +81,15 @@ public class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
                 activityRef.get().getContentResolver().takePersistableUriPermission(
                     uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
                 );
-            } else {
-                cancel(true);
-                return null;
             }
         } catch (SecurityException e) {
             e.printStackTrace();
+            if (activityRef.get() != null) {
+                message = String.format(
+                    activityRef.get().getResources().getString(R.string.removed_invalid_card),
+                    name
+                );
+            }
             cancel(true);
             return null;
         }
@@ -100,7 +102,7 @@ public class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
         if (thumbnail == null) {
             if (activityRef.get() != null) {
                 message = String.format(
-                    activityRef.get().getResources().getText(R.string.no_thumbnail).toString(),
+                    activityRef.get().getResources().getString(R.string.no_thumbnail),
                     name
                 );
             }
@@ -126,7 +128,7 @@ public class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
         }
         if (activityRef.get() != null) {
             message = String.format(
-                activityRef.get().getResources().getText(R.string.added_wallpaper).toString(),
+                activityRef.get().getResources().getString(R.string.added_wallpaper),
                 card.getName()
             );
         }

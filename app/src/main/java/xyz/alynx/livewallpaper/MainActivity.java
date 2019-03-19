@@ -19,6 +19,7 @@ package xyz.alynx.livewallpaper;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -40,6 +41,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -84,6 +86,11 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         );
         if (!pref.getBoolean(SHOWED_TIPS_KEY, false)) {
             createTipsDialog();
+        }
+
+        WallpaperInfo info = WallpaperManager.getInstance(this).getWallpaperInfo();
+        if (info == null || !Objects.equals(info.getPackageName(), getPackageName())) {
+            LWApplication.setCurrentWallpaperCard(null);
         }
 
         cardAdapter = new CardAdapter(this, LWApplication.getCards(), this);
@@ -182,6 +189,11 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             break;
         }
         case R.id.action_remove: {
+            Snackbar.make(
+                findViewById(R.id.coordinator_layout),
+                R.string.remove_tips,
+                Snackbar.LENGTH_LONG
+            ).show();
             cardAdapter.setRemovable(true);
             showCancelFab();
             break;
@@ -291,6 +303,38 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         // and because it will be back to MainActivity very quick,
         // currentWallpaperCard will be set after that, and you'll see it next desktop appearing.
         startActivityForResult(intent, PREVIEW_REQUEST_CODE);
+    }
+
+    @Override
+    public void onUseButtonClicked(@NonNull final WallpaperCard wallpaperCard) {
+        LWApplication.setCurrentWallpaperCard(wallpaperCard);
+        WallpaperInfo info = WallpaperManager.getInstance(this).getWallpaperInfo();
+        if (info == null || !Objects.equals(info.getPackageName(), getPackageName())) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.choose_wallpaper_title);
+            builder.setMessage(R.string.choose_wallpaper);
+            builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    LWApplication.setPreviewWallpaperCard(wallpaperCard);
+                    Intent intent = new Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER);
+                    startActivity(intent);
+                }
+            });
+            addDialog = builder.create();
+            addDialog.show();
+        }
+    }
+
+    @Override
+    public void onCardInvalid(@NonNull final WallpaperCard wallpaperCard) {
+        Snackbar.make(
+            findViewById(R.id.coordinator_layout),
+            String.format(
+                getResources().getString(R.string.removed_invalid_card),
+                wallpaperCard.getName()
+            ),
+            Snackbar.LENGTH_LONG
+        ).show();
     }
 
     private void showCancelFab() {

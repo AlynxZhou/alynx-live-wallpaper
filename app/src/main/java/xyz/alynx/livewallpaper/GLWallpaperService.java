@@ -297,7 +297,7 @@ public class GLWallpaperService extends WallpaperService {
             }
             // If no current card, means that services started and application not start.
             // Read preference and build a temp card.
-            if (wallpaperCard == null) {
+            if (wallpaperCard == null && !isPreview()) {
                 loadWallpaperCardPreference();
             }
             if (!checkWallpaperCardValid()) {

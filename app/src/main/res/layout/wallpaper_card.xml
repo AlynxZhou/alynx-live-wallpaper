@@ -60,25 +60,42 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:gravity="start|top"
+                    android:gravity="bottom|start"
                     android:orientation="horizontal">
+                    <Button
+                        android:id="@+id/use_button"
+                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="0dp"
+                        android:paddingStart="@dimen/card_button_padding"
+                        android:paddingEnd="@dimen/card_button_padding"
+                        android:text="@string/action_use"
+                        android:textColor="@color/useButton"
+                        android:textSize="@dimen/card_button_text_size" />
                     <Button
                         android:id="@+id/internal"
                         style="@style/Widget.AppCompat.Button.Borderless.Colored"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:enabled="false"
+                        android:minWidth="0dp"
+                        android:paddingStart="@dimen/card_button_padding"
+                        android:paddingEnd="@dimen/card_button_padding"
                         android:text="@string/internal"
                         android:textColor="@color/internal"
-                        android:textSize="@dimen/internal_size" />
+                        android:textSize="@dimen/card_button_text_size" />
                     <Button
                         android:id="@+id/remove_button"
                         style="@style/Widget.AppCompat.Button.Borderless.Colored"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:minWidth="0dp"
+                        android:paddingStart="@dimen/card_button_padding"
+                        android:paddingEnd="@dimen/card_button_padding"
                         android:text="@string/action_remove"
                         android:textColor="@color/deleteButton"
-                        android:textSize="@dimen/remove_size" />
+                        android:textSize="@dimen/card_button_text_size" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
