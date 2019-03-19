@@ -42,6 +42,6 @@
     <string name="action_use">Use</string>
     <string name="choose_wallpaper">Please select \"Alynx Live Wallpaper\" in next view</string>
     <string name="choose_wallpaper_title">Note: Choose Wallpaper</string>
-    <string name="remove_tips">Tap \"REMOVE\" button on card to remove it. Current wallpaper cannot be removed. Tap bottom-right \"check\" button to quit removal mode.</string>
+    <string name="remove_tips">Tap \"REMOVE\" button on card to remove it. Tap bottom-right \"check\" button to quit removal mode.</string>
     <string name="removed_invalid_card">Wallpaper %s was invalid and has been removed</string>
 </resources>

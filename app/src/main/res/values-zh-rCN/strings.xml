@@ -42,6 +42,6 @@
     <string name="action_use">使用</string>
     <string name="choose_wallpaper">请在下个界面选择“Alynx 动态壁纸”</string>
     <string name="choose_wallpaper_title">注意：选择壁纸</string>
-    <string name="remove_tips">点击某个卡片上的“删除”按钮来删除它。当前壁纸不能被移除。点击右下角“对号”按钮退出删除模式。</string>
+    <string name="remove_tips">点击某个卡片上的“删除”按钮来删除它。点击右下角“对号”按钮退出删除模式。</string>
     <string name="removed_invalid_card">壁纸 %s 无效且已经被移除</string>
 </resources>
