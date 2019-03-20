@@ -31,32 +31,30 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
-                <TextView
-                    android:id="@+id/name"
+                <ScrollView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/path_margin"
-                    android:layout_marginEnd="@dimen/path_margin"
-                    android:layout_marginBottom="@dimen/path_margin"
-                    android:maxHeight="@dimen/name_height"
-                    android:paddingStart="@dimen/name_padding"
-                    android:paddingEnd="@dimen/name_padding"
+                    android:layout_height="@dimen/card_scroll_height"
                     android:scrollbarStyle="outsideOverlay"
-                    android:scrollbars="vertical"
-                    android:textColor="@color/name"
-                    android:textSize="@dimen/name_size" />
-                <TextView
-                    android:id="@+id/path"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/path_margin"
-                    android:layout_marginBottom="@dimen/path_margin"
-                    android:maxHeight="@dimen/path_height"
-                    android:paddingStart="@dimen/path_padding"
-                    android:paddingEnd="@dimen/path_padding"
-                    android:scrollbarStyle="outsideOverlay"
-                    android:scrollbars="vertical"
-                    android:textSize="@dimen/path_size" />
+                    android:scrollbars="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/card_scroll_padding">
+                        <TextView
+                            android:id="@+id/name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/card_text_margin"
+                            android:textColor="@color/name"
+                            android:textSize="@dimen/name_size" />
+                        <TextView
+                            android:id="@+id/path"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/path_size" />
+                    </LinearLayout>
+                </ScrollView>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -72,6 +70,18 @@
                         android:paddingEnd="@dimen/card_button_padding"
                         android:text="@string/action_apply"
                         android:textColor="@color/applyButton"
+                        android:textSize="@dimen/card_button_text_size" />
+                    <Button
+                        android:id="@+id/current"
+                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:minWidth="0dp"
+                        android:paddingStart="@dimen/card_button_padding"
+                        android:paddingEnd="@dimen/card_button_padding"
+                        android:text="@string/current"
+                        android:textColor="@color/current"
                         android:textSize="@dimen/card_button_text_size" />
                     <Button
                         android:id="@+id/internal"

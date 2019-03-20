@@ -87,11 +87,6 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             createTipsDialog();
         }
 
-        WallpaperInfo info = WallpaperManager.getInstance(this).getWallpaperInfo();
-        if (info == null || !Objects.equals(info.getPackageName(), getPackageName())) {
-            LWApplication.setCurrentWallpaperCard(null);
-        }
-
         cardAdapter = new CardAdapter(this, LWApplication.getCards(), this);
 
         final RecyclerView recyclerView = findViewById(R.id.recycler_view);
@@ -145,6 +140,8 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         } else if (requestCode == PREVIEW_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 LWApplication.setCurrentWallpaperCard(LWApplication.getPreviewWallpaperCard());
+                // Rebind adapter.
+                cardAdapter.notifyDataSetChanged();
             }
             // Don't forget to delete preview card.
             LWApplication.setPreviewWallpaperCard(null);
@@ -245,6 +242,12 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     protected void onResume() {
         super.onResume();
         Utils.debug(TAG, "Resumed");
+        final WallpaperInfo info = WallpaperManager.getInstance(this).getWallpaperInfo();
+        if (info == null || !Objects.equals(info.getPackageName(), getPackageName())) {
+            LWApplication.setCurrentWallpaperCard(null);
+            // Rebind adapter.
+            cardAdapter.notifyDataSetChanged();
+        }
         List<WallpaperCard> cards = LWApplication.getCards();
         if (cards == null) {
             return;
@@ -309,7 +312,8 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     @Override
     public void onApplyButtonClicked(@NonNull final WallpaperCard wallpaperCard) {
         LWApplication.setCurrentWallpaperCard(wallpaperCard);
-        WallpaperInfo info = WallpaperManager.getInstance(this).getWallpaperInfo();
+        cardAdapter.notifyDataSetChanged();
+        final WallpaperInfo info = WallpaperManager.getInstance(this).getWallpaperInfo();
         if (info == null || !Objects.equals(info.getPackageName(), getPackageName())) {
             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.choose_wallpaper_title);

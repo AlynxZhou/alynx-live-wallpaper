@@ -43,4 +43,5 @@
     <string name="remove_tips">点击某个卡片上的“删除”按钮来删除它。点击右下角“对号”按钮退出删除模式。</string>
     <string name="removed_invalid_card">壁纸 %s 无效且已经被移除</string>
     <string name="applied_wallpaper">已应用壁纸 %s</string>
+    <string name="current">当前</string>
 </resources>

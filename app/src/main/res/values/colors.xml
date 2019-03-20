@@ -11,4 +11,5 @@
     <color name="internal">#0077cd</color>
     <color name="deleteButton">#cd2335</color>
     <color name="applyButton">#238967</color>
+    <color name="current">#777777</color>
 </resources>

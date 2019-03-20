@@ -35,8 +35,8 @@ public abstract class GLWallpaperRenderer implements GLSurfaceView.Renderer {
         return context;
     }
 
-    public abstract void setSourcePlayer(@NonNull final SimpleExoPlayer exoPlayer);
-    public abstract void setScreenSize(int width, int height);
-    public abstract void setVideoSizeAndRotation(int width, int height, int rotation);
-    public abstract void setOffset(float xOffset, float yOffset);
+    abstract void setSourcePlayer(@NonNull final SimpleExoPlayer exoPlayer);
+    abstract void setScreenSize(int width, int height);
+    abstract void setVideoSizeAndRotation(int width, int height, int rotation);
+    abstract void setOffset(float xOffset, float yOffset);
 }

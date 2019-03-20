@@ -66,9 +66,7 @@
         android:id="@+id/scroll_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="@dimen/content_margin"
         android:layout_marginTop="24dp"
-        android:layout_marginEnd="@dimen/content_margin"
         android:layout_marginBottom="16dp"
         android:scrollbarStyle="outsideOverlay"
         android:scrollbars="vertical"
@@ -80,12 +78,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="@dimen/app_detail_padding">
+            android:padding="@dimen/content_padding">
             <TextView
                 android:id="@+id/app_detail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:autoLink="web"
+                android:layout_marginStart="@dimen/content_margin"
+                android:layout_marginEnd="@dimen/content_margin"
                 android:text="@string/app_detail"
                 android:textAlignment="viewStart"
                 android:textSize="@dimen/app_detail_size" />

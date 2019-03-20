@@ -195,7 +195,7 @@ public class GLES30WallpaperRenderer extends GLWallpaperRenderer {
     }
 
     @Override
-    public void setSourcePlayer(@NonNull final SimpleExoPlayer exoPlayer) {
+    void setSourcePlayer(@NonNull final SimpleExoPlayer exoPlayer) {
         // Re-create SurfaceTexture when getting a new player.
         // Because maybe a new video is loaded.
         createSurfaceTexture();
@@ -203,7 +203,7 @@ public class GLES30WallpaperRenderer extends GLWallpaperRenderer {
     }
 
     @Override
-    public void setScreenSize(int width, int height) {
+    void setScreenSize(int width, int height) {
         if (screenWidth != width || screenHeight != height) {
             screenWidth = width;
             screenHeight = height;
@@ -215,7 +215,7 @@ public class GLES30WallpaperRenderer extends GLWallpaperRenderer {
     }
 
     @Override
-    public void setVideoSizeAndRotation(int width, int height, int rotation) {
+    void setVideoSizeAndRotation(int width, int height, int rotation) {
         // MediaMetadataRetriever always give us raw width and height and won't rotate them.
         // So we rotate them by ourselves.
         if (rotation % 180 != 0) {
@@ -238,7 +238,7 @@ public class GLES30WallpaperRenderer extends GLWallpaperRenderer {
     }
 
     @Override
-    public void setOffset(float xOffset, float yOffset) {
+    void setOffset(float xOffset, float yOffset) {
         final float maxXOffset = (1.0f - (
             (float)screenWidth / screenHeight) / ((float)videoWidth / videoHeight)
         ) / 2;

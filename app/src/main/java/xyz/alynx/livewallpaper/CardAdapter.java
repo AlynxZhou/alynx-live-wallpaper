@@ -78,6 +78,13 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
         } else {
             cardViewHolder.internal.setVisibility(View.GONE);
         }
+        if (card.isCurrent()) {
+            cardViewHolder.current.setVisibility(View.VISIBLE);
+            cardViewHolder.applyButton.setVisibility(View.GONE);
+        } else {
+            cardViewHolder.current.setVisibility(View.GONE);
+            cardViewHolder.applyButton.setVisibility(View.VISIBLE);
+        }
         cardViewHolder.thumbnail.setImageBitmap(card.getThumbnail());
         if (removable && card.isRemovable() && !card.isCurrent()) {
             cardViewHolder.removeButton.setVisibility(View.VISIBLE);
@@ -93,15 +100,13 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
         cardViewHolder.applyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final List<WallpaperCard> cards = LWApplication.getCards();
-                listener.onApplyButtonClicked(cards.get(cardViewHolder.getLayoutPosition()));
+                listener.onApplyButtonClicked(card);
             }
         });
         cardViewHolder.thumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final List<WallpaperCard> cards = LWApplication.getCards();
-                listener.onCardClicked(cards.get(cardViewHolder.getLayoutPosition()));
+                listener.onCardClicked(card);
             }
         });
     }
@@ -138,9 +143,10 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
 class CardViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = "CardViewHolder";
     ImageView thumbnail;
-    public TextView name;
-    public TextView path;
+    TextView name;
+    TextView path;
     Button internal;
+    Button current;
     Button removeButton;
     Button applyButton;
 
@@ -148,10 +154,9 @@ class CardViewHolder extends RecyclerView.ViewHolder {
         super(view);
         thumbnail = view.findViewById(R.id.thumbnail);
         name = view.findViewById(R.id.name);
-        name.setMovementMethod(new ScrollingMovementMethod());
         path = view.findViewById(R.id.path);
-        path.setMovementMethod(new ScrollingMovementMethod());
         internal = view.findViewById(R.id.internal);
+        current = view.findViewById(R.id.current);
         removeButton = view.findViewById(R.id.remove_button);
         applyButton = view.findViewById(R.id.apply_button);
     }

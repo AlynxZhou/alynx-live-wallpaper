@@ -9,7 +9,7 @@
     tools:context=".RewardActivity"
     tools:showIn="@layout/activity_reward">
     <TextView
-        android:id="@+id/reward_title"
+        android:id="@+id/support_author"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -26,38 +26,36 @@
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="@dimen/content_margin"
         android:layout_marginTop="@dimen/content_margin"
-        android:layout_marginEnd="@dimen/content_margin"
-        android:layout_marginBottom="@dimen/content_margin"
         android:scrollbarStyle="outsideOverlay"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/reward_title">
+        app:layout_constraintTop_toBottomOf="@+id/support_author">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="@dimen/content_padding">
             <TextView
                 android:id="@+id/a_cup_of_coffee"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/reward_text_margin"
-                android:layout_marginTop="@dimen/reward_text_margin"
-                android:layout_marginEnd="@dimen/reward_text_margin"
+                android:layout_marginStart="@dimen/content_margin"
+                android:layout_marginEnd="@dimen/content_margin"
                 android:text="@string/a_cup_of_coffee"
-                android:textAlignment="viewStart" />
+                android:textAlignment="viewStart"
+                android:textSize="@dimen/reward_text_size" />
             <TextView
                 android:id="@+id/alipay_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/reward_text_margin"
-                android:layout_marginBottom="@dimen/reward_text_margin"
+                android:layout_marginTop="@dimen/content_margin"
+                android:layout_marginBottom="@dimen/content_margin"
                 android:text="@string/alipay"
                 android:textAlignment="center"
-                android:textSize="@dimen/reward_text_size" />
+                android:textSize="@dimen/reward_title_size" />
             <ImageView
                 android:id="@+id/alipay_image"
                 android:layout_width="wrap_content"
@@ -71,11 +69,11 @@
                 android:id="@+id/wechatpay_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/reward_text_margin"
-                android:layout_marginBottom="@dimen/reward_text_margin"
+                android:layout_marginTop="@dimen/content_margin"
+                android:layout_marginBottom="@dimen/content_margin"
                 android:text="@string/wechatpay"
                 android:textAlignment="center"
-                android:textSize="@dimen/reward_text_size" />
+                android:textSize="@dimen/reward_title_size" />
             <ImageView
                 android:id="@+id/wechatpay_image"
                 android:layout_width="wrap_content"
@@ -89,20 +87,19 @@
                 android:id="@+id/paypal_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/reward_text_margin"
-                android:layout_marginBottom="@dimen/reward_text_margin"
+                android:layout_marginTop="@dimen/content_margin"
+                android:layout_marginBottom="@dimen/content_margin"
                 android:text="@string/paypal"
                 android:textAlignment="center"
-                android:textSize="@dimen/reward_text_size" />
+                android:textSize="@dimen/reward_title_size" />
             <TextView
                 android:id="@+id/paypal_link"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/reward_text_margin"
                 android:autoLink="web"
                 android:text="@string/paypal_link"
                 android:textAlignment="center"
-                android:textSize="@dimen/reward_text_size" />
+                android:textSize="@dimen/reward_title_size" />
         </LinearLayout>
     </ScrollView>
 </android.support.constraint.ConstraintLayout>

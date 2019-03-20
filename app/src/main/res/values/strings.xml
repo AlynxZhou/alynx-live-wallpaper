@@ -43,4 +43,5 @@
     <string name="remove_tips">Tap \"REMOVE\" button on card to remove it. Tap bottom-right \"check\" button to quit removal mode.</string>
     <string name="removed_invalid_card">Wallpaper %s was invalid and has been removed</string>
     <string name="applied_wallpaper">Applied wallpaper %s</string>
+    <string name="current">Current</string>
 </resources>
