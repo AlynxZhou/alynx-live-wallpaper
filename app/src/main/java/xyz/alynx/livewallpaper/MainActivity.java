@@ -29,6 +29,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -41,7 +42,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     private static final String SHOWED_TIPS_KEY = "showedTipsKey";
     public static final int SELECT_REQUEST_CODE = 3;
     public static final int PREVIEW_REQUEST_CODE = 7;
+    private CoordinatorLayout coordinatorLayout = null;
     private CardAdapter cardAdapter = null;
     private AlertDialog addDialog = null;
     private LayoutInflater layoutInflater = null;
@@ -76,8 +77,6 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         setContentView(R.layout.activity_main);
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        Utils.debug(TAG, "Created");
 
         layoutInflater = getLayoutInflater();
 
@@ -100,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(cardAdapter);
+
+        coordinatorLayout = findViewById(R.id.coordinator_layout);
 
         addCardFab = findViewById(R.id.addCardFab);
         addCardFab.setOnClickListener(new View.OnClickListener() {
@@ -178,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             editor.apply();
             if (newValue) {
                 Snackbar.make(
-                    findViewById(R.id.coordinator_layout),
+                    coordinatorLayout,
                     R.string.slide_warning,
                     Snackbar.LENGTH_LONG
                 ).show();
@@ -190,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         }
         case R.id.action_remove: {
             Snackbar.make(
-                findViewById(R.id.coordinator_layout),
+                coordinatorLayout,
                 R.string.remove_tips,
                 Snackbar.LENGTH_LONG
             ).show();
@@ -306,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     }
 
     @Override
-    public void onUseButtonClicked(@NonNull final WallpaperCard wallpaperCard) {
+    public void onApplyButtonClicked(@NonNull final WallpaperCard wallpaperCard) {
         LWApplication.setCurrentWallpaperCard(wallpaperCard);
         WallpaperInfo info = WallpaperManager.getInstance(this).getWallpaperInfo();
         if (info == null || !Objects.equals(info.getPackageName(), getPackageName())) {
@@ -322,13 +323,23 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             });
             addDialog = builder.create();
             addDialog.show();
+        } else {
+            // Display a notice for user.
+            Snackbar.make(
+                coordinatorLayout,
+                String.format(
+                    getResources().getString(R.string.applied_wallpaper),
+                    wallpaperCard.getName()
+                ),
+                Snackbar.LENGTH_LONG
+            ).show();
         }
     }
 
     @Override
     public void onCardInvalid(@NonNull final WallpaperCard wallpaperCard) {
         Snackbar.make(
-            findViewById(R.id.coordinator_layout),
+            coordinatorLayout,
             String.format(
                 getResources().getString(R.string.removed_invalid_card),
                 wallpaperCard.getName()
@@ -415,7 +426,7 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         final String path = pathEditText.getText().toString();
         if (name.length() == 0 || path.length() == 0) {
             Snackbar.make(
-                findViewById(R.id.coordinator_layout),
+                coordinatorLayout,
                 R.string.empty_name_or_path,
                 Snackbar.LENGTH_LONG
             ).show();
@@ -427,31 +438,37 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
     private void runAddCardTask(@NonNull String name, @NonNull String path) {
         new AddCardTask(this, new AddCardTask.AddCardTaskListener() {
             @Override
-            public void onPreExecute(String message) {
-                Snackbar.make(
-                    findViewById(R.id.coordinator_layout),
-                    message,
-                    Snackbar.LENGTH_LONG
-                ).show();
+            public void onPreExecute(final String message) {
+                if (message != null) {
+                    Snackbar.make(
+                        coordinatorLayout,
+                        message,
+                        Snackbar.LENGTH_LONG
+                    ).show();
+                }
             }
 
             @Override
-            public void onPostExecute(String message, WallpaperCard card) {
+            public void onPostExecute(final String message, @NonNull WallpaperCard card) {
                 cardAdapter.addCard(LWApplication.getCards().size(), card);
-                Snackbar.make(
-                    findViewById(R.id.coordinator_layout),
-                    message,
-                    Snackbar.LENGTH_LONG
-                ).show();
+                if (message != null) {
+                    Snackbar.make(
+                        coordinatorLayout,
+                        message,
+                        Snackbar.LENGTH_LONG
+                    ).show();
+                }
             }
 
             @Override
-            public void onCancelled(String message) {
-                Snackbar.make(
-                    findViewById(R.id.coordinator_layout),
-                    message,
-                    Snackbar.LENGTH_LONG
-                ).show();
+            public void onCancelled(final String message) {
+                if (message != null) {
+                    Snackbar.make(
+                        coordinatorLayout,
+                        message,
+                        Snackbar.LENGTH_LONG
+                    ).show();
+                }
             }
         }).execute(name, path);
     }

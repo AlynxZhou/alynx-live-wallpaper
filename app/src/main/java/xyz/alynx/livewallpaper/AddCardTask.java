@@ -34,9 +34,9 @@ public class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
     private String message = null;
 
     public interface AddCardTaskListener {
-        void onPreExecute(String message);
-        void onPostExecute(String message, WallpaperCard card);
-        void onCancelled(String message);
+        void onPreExecute(final String message);
+        void onPostExecute(final String message, @NonNull final WallpaperCard card);
+        void onCancelled(final String message);
     }
 
     AddCardTask(AppCompatActivity activity, @NonNull final AddCardTaskListener listener) {
@@ -47,11 +47,7 @@ public class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if (activityRef.get() != null) {
-            listener.onPreExecute(
-                activityRef.get().getResources().getString(R.string.adding_wallpaper)
-            );
-        }
+        listener.onPreExecute(message);
     }
 
     @Override
@@ -125,12 +121,6 @@ public class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
         super.onPostExecute(card);
         if (card == null) {
             return;
-        }
-        if (activityRef.get() != null) {
-            message = String.format(
-                activityRef.get().getResources().getString(R.string.added_wallpaper),
-                card.getName()
-            );
         }
         listener.onPostExecute(message, card);
     }

@@ -63,15 +63,15 @@
                     android:gravity="bottom|start"
                     android:orientation="horizontal">
                     <Button
-                        android:id="@+id/use_button"
+                        android:id="@+id/apply_button"
                         style="@style/Widget.AppCompat.Button.Borderless.Colored"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:minWidth="0dp"
                         android:paddingStart="@dimen/card_button_padding"
                         android:paddingEnd="@dimen/card_button_padding"
-                        android:text="@string/action_use"
-                        android:textColor="@color/useButton"
+                        android:text="@string/action_apply"
+                        android:textColor="@color/applyButton"
                         android:textSize="@dimen/card_button_text_size" />
                     <Button
                         android:id="@+id/internal"

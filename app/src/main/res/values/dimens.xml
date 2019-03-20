@@ -20,7 +20,7 @@
     <dimen name="path_size">13sp</dimen>
     <dimen name="path_height">60dp</dimen>
     <dimen name="card_button_text_size">15sp</dimen>
-    <dimen name="card_button_padding">20dp</dimen>
+    <dimen name="card_button_padding">15dp</dimen>
     <dimen name="app_name_size">30sp</dimen>
     <dimen name="app_author_size">21sp</dimen>
     <dimen name="app_detail_size">15sp</dimen>

@@ -39,7 +39,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
 
     public interface OnCardClickedListener {
         void onCardClicked(@NonNull final WallpaperCard wallpaperCard);
-        void onUseButtonClicked(@NonNull final WallpaperCard wallpaperCard);
+        void onApplyButtonClicked(@NonNull final WallpaperCard wallpaperCard);
         void onCardInvalid(@NonNull final WallpaperCard wallpaperCard);
     }
 
@@ -90,11 +90,11 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
                 removeCard(cardViewHolder.getLayoutPosition());
             }
         });
-        cardViewHolder.useButton.setOnClickListener(new View.OnClickListener() {
+        cardViewHolder.applyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 final List<WallpaperCard> cards = LWApplication.getCards();
-                listener.onUseButtonClicked(cards.get(cardViewHolder.getLayoutPosition()));
+                listener.onApplyButtonClicked(cards.get(cardViewHolder.getLayoutPosition()));
             }
         });
         cardViewHolder.thumbnail.setOnClickListener(new View.OnClickListener() {
@@ -142,7 +142,7 @@ class CardViewHolder extends RecyclerView.ViewHolder {
     public TextView path;
     Button internal;
     Button removeButton;
-    Button useButton;
+    Button applyButton;
 
     CardViewHolder(View view) {
         super(view);
@@ -153,6 +153,6 @@ class CardViewHolder extends RecyclerView.ViewHolder {
         path.setMovementMethod(new ScrollingMovementMethod());
         internal = view.findViewById(R.id.internal);
         removeButton = view.findViewById(R.id.remove_button);
-        useButton = view.findViewById(R.id.use_button);
+        applyButton = view.findViewById(R.id.apply_button);
     }
 }
