@@ -11,6 +11,13 @@ Page](https://img.shields.io/badge/Play%20Store-Alynx%20Live%20Wallpaper-blue.sv
 
 **Need GLESv2 or higher version support for cropping video size.**
 
+# Notice
+
+This is not a demo like most tutorial saying "build a android video wallpaper", which just create a MediaPlayer with WallpaperSurface as its destination.
+MediaPlayer cannot crop video, instead it just fill screen with video frame, also it will hold audio channel.
+I build this app with ExoPlayer because it can disable audio track, and write a custom OpenGL ES renderer to center-crop video, and added UI to choose video.
+If you are learning create live wallpaper and getting in trouble with MediaPlayer, you can read my code for help.
+
 # Icons
 
 Some icons and videos are from following links, thanks to authors.
