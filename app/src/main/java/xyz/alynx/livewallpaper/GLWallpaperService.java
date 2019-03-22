@@ -353,7 +353,6 @@ public class GLWallpaperService extends WallpaperService {
             videoRotation = Integer.parseInt(rotation);
             videoWidth = Integer.parseInt(width);
             videoHeight = Integer.parseInt(height);
-
         }
 
         private void startPlayer() {
@@ -383,7 +382,6 @@ public class GLWallpaperService extends WallpaperService {
                     trackSelector.setParameters(
                         trackSelector.buildUponParameters().setRendererDisabled(i, true)
                     );
-                    break;
                 }
             }
             exoPlayer.setRepeatMode(Player.REPEAT_MODE_ALL);
