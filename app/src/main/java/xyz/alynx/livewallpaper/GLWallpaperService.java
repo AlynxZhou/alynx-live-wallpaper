@@ -24,7 +24,6 @@ import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.ParcelFileDescriptor;
 import android.service.wallpaper.WallpaperService;
@@ -46,7 +45,6 @@ import com.google.android.exoplayer2.util.Util;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 /**
  *
@@ -69,7 +67,6 @@ public class GLWallpaperService extends WallpaperService {
 
     public class GLWallpaperEngine extends Engine {
         private static final String TAG = "GLWallpaperEngine";
-        private static final String CURRENT_CARD_PREF = "currentWallpaperCard";
         private Context context;
         private GLWallpaperSurfaceView glSurfaceView = null;
         private SimpleExoPlayer exoPlayer = null;
@@ -108,7 +105,13 @@ public class GLWallpaperService extends WallpaperService {
 
         GLWallpaperEngine(@NonNull final Context context) {
             this.context = context;
+            setTouchEventsEnabled(false);
         }
+
+        // @Override
+        // public void onTouchEvent(MotionEvent event) {
+        //     super.onTouchEvent(event);
+        // }
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
@@ -138,11 +141,11 @@ public class GLWallpaperService extends WallpaperService {
                         LWApplication.OPTIONS_PREF, MODE_PRIVATE
                     );
                     allowSlide = pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false);
-                    startPlayer();
                     glSurfaceView.onResume();
+                    startPlayer();
                 } else {
-                    glSurfaceView.onPause();
                     stopPlayer();
+                    glSurfaceView.onPause();
                     // Prevent useless renderer calculating.
                     allowSlide = false;
                 }
@@ -176,8 +179,8 @@ public class GLWallpaperService extends WallpaperService {
         @Override
         public void onSurfaceDestroyed(SurfaceHolder holder) {
             super.onSurfaceDestroyed(holder);
-            glSurfaceView.onDestroy();
             stopPlayer();
+            glSurfaceView.onDestroy();
         }
 
         @Override
@@ -248,57 +251,12 @@ public class GLWallpaperService extends WallpaperService {
             return res;
         }
 
-        private void saveWallpaperCardPreference() {
-            if (wallpaperCard == null) {
-                Utils.debug(TAG, "Save wallpaper card failed, wallpaper card is null");
-                return;
-            }
-            final SharedPreferences pref = getSharedPreferences(CURRENT_CARD_PREF, MODE_PRIVATE);
-            // Save to preference.
-            final SharedPreferences.Editor prefEditor = pref.edit();
-            prefEditor.putString("name", wallpaperCard.getName());
-            prefEditor.putString("path", wallpaperCard.getPath());
-            switch (wallpaperCard.getType()) {
-            case INTERNAL:
-                prefEditor.putString("type",  "INTERNAL");
-                break;
-            case EXTERNAL:
-                prefEditor.putString("type", "EXTERNAL");
-                break;
-            }
-            prefEditor.apply();
-        }
-
-        private void loadWallpaperCardPreference() {
-            final SharedPreferences pref = getSharedPreferences(CURRENT_CARD_PREF, MODE_PRIVATE);
-            final String name = pref.getString("name", null);
-            final String path = pref.getString("path", null);
-            if (name == null || path == null) {
-                wallpaperCard = null;
-                return;
-            }
-            WallpaperCard.Type type = WallpaperCard.Type.EXTERNAL;
-            Uri uri;
-            if (Objects.equals(pref.getString("type", null), "INTERNAL")) {
-                type = WallpaperCard.Type.INTERNAL;
-                uri = Uri.parse("file:///android_asset/" + path);
-            } else {
-                uri = Uri.parse(path);
-            }
-            wallpaperCard = new WallpaperCard(name, path, uri, type, null);
-        }
-
         private void loadWallpaperCard() {
             oldWallpaperCard = wallpaperCard;
             if (isPreview()) {
                 wallpaperCard = LWApplication.getPreviewWallpaperCard();
             } else {
-                wallpaperCard = LWApplication.getCurrentWallpaperCard();
-            }
-            // If no current card, means that services started and application not start.
-            // Read preference and build a temp card.
-            if (wallpaperCard == null && !isPreview()) {
-                loadWallpaperCardPreference();
+                wallpaperCard = LWApplication.getCurrentWallpaperCard(context);
             }
             if (!checkWallpaperCardValid()) {
                 if (wallpaperCard != null) {
@@ -307,20 +265,14 @@ public class GLWallpaperService extends WallpaperService {
                     wallpaperCard.setInvalid();
                 }
                 // Load default wallpaper.
-                final List<WallpaperCard> cards = LWApplication.getCards();
-                if (cards != null && cards.size() > 0 && cards.get(0) != null) {
+                final List<WallpaperCard> cards = LWApplication.getCards(context);
+                if (cards.size() > 0 && cards.get(0) != null) {
                     wallpaperCard = cards.get(0);
                 } else {
                     wallpaperCard = null;
                     Toast.makeText(context, R.string.default_failed, Toast.LENGTH_LONG).show();
                     throw new RuntimeException("Failed to fallback to internal wallpaper");
                 }
-            }
-            if (!isPreview()) {
-                if (wallpaperCard != null) {
-                    LWApplication.setCurrentWallpaperCard(wallpaperCard);
-                }
-                saveWallpaperCardPreference();
             }
         }
 
@@ -369,8 +321,8 @@ public class GLWallpaperService extends WallpaperService {
                 getVideoMetadata();
             } catch (IOException e) {
                 e.printStackTrace();
-                stopPlayer();
-                startPlayer();
+                // gg
+                return;
             }
             trackSelector = new DefaultTrackSelector();
             exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);

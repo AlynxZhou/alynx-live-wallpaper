@@ -54,6 +54,8 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
     private int videoRotation = 0;
     private float xOffset = 0;
     private float yOffset = 0;
+    private float maxXOffset = 0;
+    private float maxYOffset = 0;
     // Fix bug like https://stackoverflow.com/questions/14185661/surfacetexture-onframeavailablelistener-stops-being-called
     private long updatedFrame = 0;
     private long renderedFrame = 0;
@@ -210,6 +212,12 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
             Utils.debug(TAG, String.format(
                 Locale.US, "Set screen size to %dx%d", screenWidth, screenHeight
             ));
+            maxXOffset = (1.0f - (
+                (float)screenWidth / screenHeight) / ((float)videoWidth / videoHeight)
+            ) / 2;
+            maxYOffset = (1.0f - (
+                (float)screenHeight / screenWidth) / ((float)videoHeight / videoWidth)
+            ) / 2;
             updateMatrix();
         }
     }
@@ -233,18 +241,18 @@ public class GLES20WallpaperRenderer extends GLWallpaperRenderer {
             Utils.debug(TAG, String.format(
                 Locale.US, "Set video rotation to %d", videoRotation
             ));
+            maxXOffset = (1.0f - (
+                (float)screenWidth / screenHeight) / ((float)videoWidth / videoHeight)
+            ) / 2;
+            maxYOffset = (1.0f - (
+                (float)screenHeight / screenWidth) / ((float)videoHeight / videoWidth)
+            ) / 2;
             updateMatrix();
         }
     }
 
     @Override
     void setOffset(float xOffset, float yOffset) {
-        final float maxXOffset = (1.0f - (
-            (float)screenWidth / screenHeight) / ((float)videoWidth / videoHeight)
-        ) / 2;
-        final float maxYOffset = (1.0f - (
-            (float)screenHeight / screenWidth) / ((float)videoHeight / videoWidth)
-        ) / 2;
         if (xOffset > maxXOffset) {
             xOffset = maxXOffset;
         }

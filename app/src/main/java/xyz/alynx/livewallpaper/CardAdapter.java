@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -116,8 +115,9 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
         return cards.size();
     }
 
-    void addCard(final int position, @NonNull final WallpaperCard card) {
-        cards.add(position, card);
+    void addCard(@NonNull final WallpaperCard wallpaperCard) {
+        final int position = cards.size();
+        cards.add(position, wallpaperCard);
         notifyItemInserted(position);
     }
 

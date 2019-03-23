@@ -24,8 +24,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
-import java.util.Objects;
 
 public class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
     private static final String TAG = "AddCardTask";
@@ -52,24 +50,11 @@ public class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
 
     @Override
     protected WallpaperCard doInBackground(String... strings) {
-        List<WallpaperCard> cards = LWApplication.getCards();
         String name = strings[0];
         if (name.length() > 30) {
             name = name.substring(0, 30);
         }
         String path = strings[1];
-        for (WallpaperCard card : cards) {
-            if (Objects.equals(card.getPath(), path)) {
-                if (activityRef.get() != null) {
-                    message = String.format(
-                        activityRef.get().getResources().getString(R.string.same_wallpaper),
-                        name, card.getName()
-                    );
-                }
-                cancel(true);
-                return null;
-            }
-        }
         Uri uri = Uri.parse(path);
         try {
             if (activityRef.get() != null) {

@@ -58,7 +58,8 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity implements CardAdapter.OnCardClickedListener {
+public class MainActivity extends AppCompatActivity
+    implements CardAdapter.OnCardClickedListener, AddCardTask.AddCardTaskListener {
     private static final String TAG = "MainActivity";
     private static final String FIRST_START_PREF = "firstStartPref";
     private static final String SHOWED_TIPS_KEY = "showedTipsKey";
@@ -87,7 +88,9 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             createTipsDialog();
         }
 
-        cardAdapter = new CardAdapter(this, LWApplication.getCards(), this);
+        cardAdapter = new CardAdapter(
+            this, LWApplication.getCards(this), this
+        );
 
         final RecyclerView recyclerView = findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -139,7 +142,9 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             }
         } else if (requestCode == PREVIEW_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                LWApplication.setCurrentWallpaperCard(LWApplication.getPreviewWallpaperCard());
+                LWApplication.setCurrentWallpaperCard(
+                    this, LWApplication.getPreviewWallpaperCard()
+                );
                 // Rebind adapter.
                 cardAdapter.notifyDataSetChanged();
             }
@@ -244,14 +249,11 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
         Utils.debug(TAG, "Resumed");
         final WallpaperInfo info = WallpaperManager.getInstance(this).getWallpaperInfo();
         if (info == null || !Objects.equals(info.getPackageName(), getPackageName())) {
-            LWApplication.setCurrentWallpaperCard(null);
+            LWApplication.setCurrentWallpaperCard(this, null);
             // Rebind adapter.
             cardAdapter.notifyDataSetChanged();
         }
-        List<WallpaperCard> cards = LWApplication.getCards();
-        if (cards == null) {
-            return;
-        }
+        List<WallpaperCard> cards = LWApplication.getCards(this);
         try {
             final FileInputStream fis = openFileInput(LWApplication.JSON_FILE_NAME);
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fis));
@@ -275,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
                     }
                 }
                 if (!found) {
-                    runAddCardTask(name, path);
+                    new AddCardTask(this, this).execute(name, path);
                 }
             }
             bufferedReader.close();
@@ -311,8 +313,6 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
 
     @Override
     public void onApplyButtonClicked(@NonNull final WallpaperCard wallpaperCard) {
-        LWApplication.setCurrentWallpaperCard(wallpaperCard);
-        cardAdapter.notifyDataSetChanged();
         final WallpaperInfo info = WallpaperManager.getInstance(this).getWallpaperInfo();
         if (info == null || !Objects.equals(info.getPackageName(), getPackageName())) {
             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -320,6 +320,9 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             builder.setMessage(R.string.choose_wallpaper);
             builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
+                    // Only after user click OK, we change currentWallpaperCard.
+                    LWApplication.setCurrentWallpaperCard(getApplicationContext(), wallpaperCard);
+                    cardAdapter.notifyDataSetChanged();
                     LWApplication.setPreviewWallpaperCard(wallpaperCard);
                     Intent intent = new Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER);
                     startActivity(intent);
@@ -328,6 +331,8 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             addDialog = builder.create();
             addDialog.show();
         } else {
+            LWApplication.setCurrentWallpaperCard(this, wallpaperCard);
+            cardAdapter.notifyDataSetChanged();
             // Display a notice for user.
             Snackbar.make(
                 coordinatorLayout,
@@ -350,6 +355,54 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             ),
             Snackbar.LENGTH_LONG
         ).show();
+    }
+
+    @Override
+    public void onPreExecute(final String message) {
+        if (message != null) {
+            Snackbar.make(
+                coordinatorLayout,
+                message,
+                Snackbar.LENGTH_LONG
+            ).show();
+        }
+    }
+
+    @Override
+    public void onPostExecute(final String message, @NonNull WallpaperCard card) {
+        final List<WallpaperCard> cards = LWApplication.getCards(getApplicationContext());
+        for (WallpaperCard wallpaperCard : cards) {
+            if (card.equals(wallpaperCard)) {
+                Snackbar.make(
+                    coordinatorLayout,
+                    String.format(
+                        getResources().getString(R.string.same_wallpaper),
+                        wallpaperCard.getName(), card.getName()
+                    ),
+                    Snackbar.LENGTH_LONG
+                ).show();
+                return;
+            }
+        }
+        cardAdapter.addCard(card);
+        if (message != null) {
+            Snackbar.make(
+                coordinatorLayout,
+                message,
+                Snackbar.LENGTH_LONG
+            ).show();
+        }
+    }
+
+    @Override
+    public void onCancelled(final String message) {
+        if (message != null) {
+            Snackbar.make(
+                coordinatorLayout,
+                message,
+                Snackbar.LENGTH_LONG
+            ).show();
+        }
     }
 
     private void showCancelFab() {
@@ -436,44 +489,6 @@ public class MainActivity extends AppCompatActivity implements CardAdapter.OnCar
             ).show();
             return;
         }
-        runAddCardTask(name, path);
-    }
-
-    private void runAddCardTask(@NonNull String name, @NonNull String path) {
-        new AddCardTask(this, new AddCardTask.AddCardTaskListener() {
-            @Override
-            public void onPreExecute(final String message) {
-                if (message != null) {
-                    Snackbar.make(
-                        coordinatorLayout,
-                        message,
-                        Snackbar.LENGTH_LONG
-                    ).show();
-                }
-            }
-
-            @Override
-            public void onPostExecute(final String message, @NonNull WallpaperCard card) {
-                cardAdapter.addCard(LWApplication.getCards().size(), card);
-                if (message != null) {
-                    Snackbar.make(
-                        coordinatorLayout,
-                        message,
-                        Snackbar.LENGTH_LONG
-                    ).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(final String message) {
-                if (message != null) {
-                    Snackbar.make(
-                        coordinatorLayout,
-                        message,
-                        Snackbar.LENGTH_LONG
-                    ).show();
-                }
-            }
-        }).execute(name, path);
+        new AddCardTask(this, this).execute(name, path);
     }
 }

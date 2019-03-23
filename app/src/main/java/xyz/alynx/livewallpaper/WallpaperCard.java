@@ -116,8 +116,7 @@ public class WallpaperCard {
      * Compare this to LWApplication's currentWallpaperCard.
      */
     boolean isCurrent() {
-        return LWApplication.getCurrentWallpaperCard() != null &&
-            equals(LWApplication.getCurrentWallpaperCard());
+        return LWApplication.isCurrentWallpaperCard(this);
     }
 
     boolean isValid() {
