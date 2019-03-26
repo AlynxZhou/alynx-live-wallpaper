@@ -32,24 +32,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@SuppressWarnings("WeakerAccess")
 public class LWApplication extends Application {
+    @SuppressWarnings("unused")
     private static final String TAG = "LWApplication";
     public static final String JSON_FILE_NAME = "data.json";
-    public static final String CURRENT_CARD_PREF = "currentWallpaperCard";
+    private static final String CURRENT_CARD_PREF = "currentWallpaperCard";
     public static final String OPTIONS_PREF = "options";
     public static final String SLIDE_WALLPAPER_KEY = "slideWallpaper";
-    public static final String INTERNAL_WALLPAPER_IMAGE_PATH = "wallpapers/fire-rain/fire-rain-512x384.jpg";
-    public static final String INTERNAL_WALLPAPER_VIDEO_PATH = "wallpapers/fire-rain/fire-rain-720x720.mp4";
+    private static final String INTERNAL_WALLPAPER_IMAGE_PATH = "wallpapers/fire-rain/fire-rain-512x384.webp";
+    private static final String INTERNAL_WALLPAPER_VIDEO_PATH = "wallpapers/fire-rain/fire-rain-720x720.mp4";
     private static List<WallpaperCard> cards = null;
     private static WallpaperCard currentWallpaperCard = null;
     private static WallpaperCard previewWallpaperCard = null;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        // Here is for non-static field, but what we need is for static field.
-        // So we can do nothing here.
-    }
 
     @NonNull
     public static List<WallpaperCard> getCards(@NonNull final Context context) {

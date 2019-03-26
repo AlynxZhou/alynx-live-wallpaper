@@ -32,15 +32,16 @@ import java.util.Objects;
  */
 
 public class WallpaperCard {
+    @SuppressWarnings("unused")
     private static final String TAG = "WallpaperCard";
     private String name;
     // It's hard to access file path with Android built-in file chooser.
     // So actually path is a path.
     private String path;
     private Uri uri;
-    private Bitmap thumbnail;
+    private final Bitmap thumbnail;
     private boolean valid = true;
-    private Type type;
+    private final Type type;
 
     // INTERNAL means this video is bundled into app assets.
     // So it cannot be removed.
@@ -65,7 +66,7 @@ public class WallpaperCard {
         return name;
     }
 
-    public void setName(@NonNull final String name) {
+    private void setName(@NonNull final String name) {
         this.name = name;
     }
 
@@ -74,7 +75,7 @@ public class WallpaperCard {
         return path;
     }
 
-    public void setPath(@NonNull final String path) {
+    private void setPath(@NonNull final String path) {
         this.path = path;
     }
 

@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
 public class RewardActivity extends AppCompatActivity {
+    @SuppressWarnings("unused")
     private static final String TAG = "RewardActivity";
 
     @Override

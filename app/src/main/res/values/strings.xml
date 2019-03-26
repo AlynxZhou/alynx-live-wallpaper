@@ -8,7 +8,7 @@
     <string name="path">Path:</string>
     <string name="name">Name:</string>
     <string name="enter_wallpaper_name">Enter wallpaper name</string>
-    <string name="choose_file">Choose</string>
+    <string name="choose">Choose</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="add_wallpaper">Add Wallpaper</string>
@@ -44,4 +44,5 @@
     <string name="removed_invalid_card">Wallpaper %s was invalid and has been removed</string>
     <string name="applied_wallpaper">Applied wallpaper %s</string>
     <string name="current">Current</string>
+    <string name="choose_file">Choose file with button…</string>
 </resources>

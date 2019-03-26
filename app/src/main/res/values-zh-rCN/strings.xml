@@ -7,7 +7,7 @@
     <string name="path">路径：</string>
     <string name="name">名称：</string>
     <string name="enter_wallpaper_name">输入一个壁纸名称</string>
-    <string name="choose_file">选择</string>
+    <string name="choose">选择</string>
     <string name="ok">确认</string>
     <string name="cancel">取消</string>
     <string name="add_wallpaper">添加壁纸</string>
@@ -44,4 +44,5 @@
     <string name="removed_invalid_card">壁纸 %s 无效且已经被移除</string>
     <string name="applied_wallpaper">已应用壁纸 %s</string>
     <string name="current">当前</string>
+    <string name="choose_file">点击按钮选择文件……</string>
 </resources>

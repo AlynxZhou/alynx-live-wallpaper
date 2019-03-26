@@ -23,6 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 public class AboutActivity extends AppCompatActivity {
+    @SuppressWarnings("unused")
     private static final String TAG = "AboutActivity";
 
     @Override

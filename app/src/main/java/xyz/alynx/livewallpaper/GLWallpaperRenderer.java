@@ -22,16 +22,18 @@ import android.support.annotation.NonNull;
 
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
-public abstract class GLWallpaperRenderer implements GLSurfaceView.Renderer {
+abstract class GLWallpaperRenderer implements GLSurfaceView.Renderer {
+    @SuppressWarnings("unused")
     private static final String TAG = "GLWallpaperRenderer";
-    protected Context context;
+    final Context context;
 
     GLWallpaperRenderer(@NonNull final Context context) {
         this.context = context;
     }
 
+    @SuppressWarnings("unused")
     @NonNull
-    public Context getContext() {
+    protected Context getContext() {
         return context;
     }
 

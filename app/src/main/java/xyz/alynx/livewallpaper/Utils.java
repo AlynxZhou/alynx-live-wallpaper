@@ -30,7 +30,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class Utils {
+class Utils {
+    @SuppressWarnings("unused")
     private static final String TAG = "Utils";
 
     /**

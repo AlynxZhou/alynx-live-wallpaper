@@ -25,10 +25,11 @@ import android.support.v7.app.AppCompatActivity;
 
 import java.lang.ref.WeakReference;
 
-public class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
+class AddCardTask extends AsyncTask<String, Void, WallpaperCard> {
+    @SuppressWarnings("unused")
     private static final String TAG = "AddCardTask";
-    private WeakReference<AppCompatActivity> activityRef;
-    private AddCardTaskListener listener;
+    private final WeakReference<AppCompatActivity> activityRef;
+    private final AddCardTaskListener listener;
     private String message = null;
 
     public interface AddCardTaskListener {

@@ -27,6 +27,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
@@ -60,11 +61,12 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity
     implements CardAdapter.OnCardClickedListener, AddCardTask.AddCardTaskListener {
+    @SuppressWarnings("unused")
     private static final String TAG = "MainActivity";
     private static final String FIRST_START_PREF = "firstStartPref";
     private static final String SHOWED_TIPS_KEY = "showedTipsKey";
-    public static final int SELECT_REQUEST_CODE = 3;
-    public static final int PREVIEW_REQUEST_CODE = 7;
+    private static final int SELECT_REQUEST_CODE = 3;
+    private static final int PREVIEW_REQUEST_CODE = 7;
     private CoordinatorLayout coordinatorLayout = null;
     private CardAdapter cardAdapter = null;
     private AlertDialog addDialog = null;
@@ -207,16 +209,24 @@ public class MainActivity extends AppCompatActivity
         }
         case R.id.action_reward: {
             final Intent intent = new Intent(this, RewardActivity.class);
-            startActivity(
-                intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
-            );
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                startActivity(
+                    intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+                );
+            } else {
+                startActivity(intent);
+            }
             break;
         }
         case R.id.action_about: {
             final Intent intent = new Intent(this, AboutActivity.class);
-            startActivity(
-                intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
-            );
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                startActivity(
+                    intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+                );
+            } else {
+                startActivity(intent);
+            }
             break;
         }
         default:

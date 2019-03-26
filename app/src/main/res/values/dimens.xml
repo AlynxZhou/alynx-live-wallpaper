@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="fab_margin">20dp</dimen>
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="item_offset">10dp</dimen>
-    <dimen name="detail_backdrop_height">250dp</dimen>
-    <dimen name="backdrop_title">30dp</dimen>
-    <dimen name="backdrop_subtitle">18dp</dimen>
     <dimen name="card_margin">5dp</dimen>
     <dimen name="card_radius">3dp</dimen>
     <dimen name="thumbnail_width">160dp</dimen>
@@ -29,7 +23,7 @@
     <dimen name="support_author_size">30sp</dimen>
     <dimen name="reward_title_size">20sp</dimen>
     <dimen name="reward_text_size">16sp</dimen>
-    <dimen name="reward_image_margin">30dp</dimen>
+    <dimen name="reward_image_margin">70dp</dimen>
     <dimen name="dialog_padding">20dp</dimen>
     <dimen name="tips_text_size">15sp</dimen>
 </resources>

@@ -63,11 +63,12 @@ import java.util.List;
  *
  */
 public class GLWallpaperService extends WallpaperService {
+    @SuppressWarnings("unused")
     private static final String TAG = "GLWallpaperService";
 
-    public class GLWallpaperEngine extends Engine {
+    class GLWallpaperEngine extends Engine {
         private static final String TAG = "GLWallpaperEngine";
-        private Context context;
+        private final Context context;
         private GLWallpaperSurfaceView glSurfaceView = null;
         private SimpleExoPlayer exoPlayer = null;
         private MediaSource videoSource = null;
@@ -82,6 +83,7 @@ public class GLWallpaperService extends WallpaperService {
         private long progress = 0;
 
         private class GLWallpaperSurfaceView extends GLSurfaceView {
+            @SuppressWarnings("unused")
             private static final String TAG = "GLWallpaperSurface";
 
             public GLWallpaperSurfaceView(Context context) {
@@ -98,7 +100,7 @@ public class GLWallpaperService extends WallpaperService {
                 return getSurfaceHolder();
             }
 
-            public void onDestroy() {
+            void onDestroy() {
                 super.onDetachedFromWindow();
             }
         }
@@ -181,11 +183,6 @@ public class GLWallpaperService extends WallpaperService {
             super.onSurfaceDestroyed(holder);
             stopPlayer();
             glSurfaceView.onDestroy();
-        }
-
-        @Override
-        public void onDestroy() {
-            super.onDestroy();
         }
 
         private void createGLSurfaceView() {

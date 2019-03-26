@@ -29,11 +29,12 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
+class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
+    @SuppressWarnings("unused")
     private static final String TAG = "CardAdapter";
-    private Context context;
-    private List<WallpaperCard> cards;
-    private OnCardClickedListener listener;
+    private final Context context;
+    private final List<WallpaperCard> cards;
+    private final OnCardClickedListener listener;
     private boolean removable = false;
 
     public interface OnCardClickedListener {
@@ -141,14 +142,15 @@ public class CardAdapter extends RecyclerView.Adapter<CardViewHolder> {
 }
 
 class CardViewHolder extends RecyclerView.ViewHolder {
+    @SuppressWarnings("unused")
     private static final String TAG = "CardViewHolder";
-    ImageView thumbnail;
-    TextView name;
-    TextView path;
-    Button internal;
-    Button current;
-    Button removeButton;
-    Button applyButton;
+    final ImageView thumbnail;
+    final TextView name;
+    final TextView path;
+    final Button internal;
+    final Button current;
+    final Button removeButton;
+    final Button applyButton;
 
     CardViewHolder(View view) {
         super(view);

@@ -35,17 +35,18 @@ import java.util.Locale;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class GLES30WallpaperRenderer extends GLWallpaperRenderer {
+class GLES30WallpaperRenderer extends GLWallpaperRenderer {
+    @SuppressWarnings("unused")
     private static final String TAG = "GLES30WallpaperRenderer";
     private static final int BYTES_PER_FLOAT = 4;
     private static final int BYTES_PER_INT = 4;
-    private FloatBuffer vertices;
-    private FloatBuffer texCoords;
-    private IntBuffer indices;
-    private float[] mvp;
+    private final FloatBuffer vertices;
+    private final FloatBuffer texCoords;
+    private final IntBuffer indices;
+    private final float[] mvp;
     private int program = 0;
     private int mvpLocation = 0;
-    private int[] textures;
+    private final int[] textures;
     private SurfaceTexture surfaceTexture = null;
     private int screenWidth = 0;
     private int screenHeight = 0;
@@ -228,6 +229,7 @@ public class GLES30WallpaperRenderer extends GLWallpaperRenderer {
         // So we rotate them by ourselves.
         if (rotation % 180 != 0) {
             final int swap = width;
+            //noinspection SuspiciousNameCombination
             width = height;
             height = swap;
         }
