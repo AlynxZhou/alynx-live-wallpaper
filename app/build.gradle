@@ -6,13 +6,15 @@ android {
         applicationId "xyz.alynx.livewallpaper"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 28
-        versionName "1.3.22"
+        versionCode 29
+        versionName "1.3.23"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        resConfigs "en", "zh_CN"
     }
     buildTypes {
         release {
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
