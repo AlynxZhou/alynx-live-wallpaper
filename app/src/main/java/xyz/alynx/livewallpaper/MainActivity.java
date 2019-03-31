@@ -26,9 +26,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -136,11 +138,29 @@ public class MainActivity extends AppCompatActivity
                 getContentResolver().takePersistableUriPermission(
                     uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
                 );
+                final EditText nameEditText = addDialog.findViewById(R.id.name_edit_text);
                 final EditText pathEditText = addDialog.findViewById(R.id.path_edit_text);
-                if (pathEditText == null) {
+                if (pathEditText == null || nameEditText == null) {
                     return;
                 }
                 pathEditText.setText(uri.toString());
+                if (Objects.equals(uri.getScheme(), "file")) {
+                    nameEditText.setText(uri.getLastPathSegment());
+                } else {
+                    Cursor cursor = getContentResolver().query(
+                        uri, null, null, null, null
+                    );
+                    if (cursor == null) {
+                        return;
+                    }
+                    int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    cursor.moveToFirst();
+                    String name = cursor.getString(nameIndex);
+                    if (name != null && name.length() != 0) {
+                        nameEditText.setText(name);
+                    }
+                    cursor.close();
+                }
             }
         } else if (requestCode == PREVIEW_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
