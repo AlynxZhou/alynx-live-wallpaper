@@ -43,10 +43,13 @@ class GLES20WallpaperRenderer extends GLWallpaperRenderer {
     private final FloatBuffer vertices;
     private final FloatBuffer texCoords;
     private final IntBuffer indices;
+    private final int[] textures;
+    private final int[] buffers;
     private final float[] mvp;
     private int program = 0;
     private int mvpLocation = 0;
-    private final int[] textures;
+    private int positionLocation = 0;
+    private int texCoordLocation = 0;
     private SurfaceTexture surfaceTexture = null;
     private int screenWidth = 0;
     private int screenHeight = 0;
@@ -106,8 +109,8 @@ class GLES20WallpaperRenderer extends GLWallpaperRenderer {
         ).order(ByteOrder.nativeOrder()).asIntBuffer();
         indices.put(indexArray).position(0);
 
+        buffers = new int[3];
         textures = new int[1];
-
         mvp = new float[] {
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
@@ -124,7 +127,6 @@ class GLES20WallpaperRenderer extends GLWallpaperRenderer {
         GLES20.glDisable(GLES20.GL_CULL_FACE);
         GLES20.glDisable(GLES20.GL_BLEND);
 
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glGenTextures(textures.length, textures, 0);
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0]);
         GLES20.glTexParameteri(
@@ -157,18 +159,35 @@ class GLES20WallpaperRenderer extends GLWallpaperRenderer {
             )
         );
         mvpLocation = GLES20.glGetUniformLocation(program, "mvp");
-        // Position is NOT set in shader sources.
-        GLES20.glVertexAttribPointer(
-            GLES20.glGetAttribLocation(program, "in_position"), 2, GLES20.GL_FLOAT,
-            false, 0, vertices
-        );
-        GLES20.glVertexAttribPointer(
-            GLES20.glGetAttribLocation(program, "in_tex_coord"), 2, GLES20.GL_FLOAT,
-            false, 0, texCoords
-        );
+        // Locations are NOT set in shader sources.
+        positionLocation = GLES20.glGetAttribLocation(program, "in_position");
+        texCoordLocation = GLES20.glGetAttribLocation(program, "in_tex_coord");
 
-        GLES20.glEnableVertexAttribArray(0);
-        GLES20.glEnableVertexAttribArray(1);
+        GLES20.glGenBuffers(buffers.length, buffers, 0);
+
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
+        GLES20.glBufferData(
+            GLES20.GL_ARRAY_BUFFER, vertices.capacity() * BYTES_PER_FLOAT,
+            vertices, GLES20.GL_STATIC_DRAW
+        );
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[1]);
+        GLES20.glBufferData(
+            GLES20.GL_ARRAY_BUFFER, texCoords.capacity() * BYTES_PER_FLOAT,
+            texCoords, GLES20.GL_STATIC_DRAW
+        );
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, buffers[2]);
+        GLES20.glBufferData(
+            GLES20.GL_ELEMENT_ARRAY_BUFFER, indices.capacity() * BYTES_PER_INT,
+            indices, GLES20.GL_STATIC_DRAW
+        );
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
     @Override
@@ -190,11 +209,27 @@ class GLES20WallpaperRenderer extends GLWallpaperRenderer {
             // );
         }
 
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glUseProgram(program);
         GLES20.glUniformMatrix4fv(mvpLocation, 1, false, mvp, 0);
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, indices);
+        // No vertex array in OpenGL ES 2.
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
+        GLES20.glEnableVertexAttribArray(positionLocation);
+        GLES20.glVertexAttribPointer(
+            positionLocation, 2, GLES20.GL_FLOAT, false, 2 * BYTES_PER_FLOAT, 0
+        );
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[1]);
+        GLES20.glEnableVertexAttribArray(texCoordLocation);
+        GLES20.glVertexAttribPointer(
+            texCoordLocation, 2, GLES20.GL_FLOAT, false, 2 * BYTES_PER_FLOAT, 0
+        );
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, buffers[2]);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, 0);
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+        GLES20.glDisableVertexAttribArray(texCoordLocation);
+        GLES20.glDisableVertexAttribArray(positionLocation);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        GLES20.glUseProgram(0);
     }
 
     @Override

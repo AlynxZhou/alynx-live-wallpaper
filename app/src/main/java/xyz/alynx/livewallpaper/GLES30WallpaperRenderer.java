@@ -43,10 +43,12 @@ class GLES30WallpaperRenderer extends GLWallpaperRenderer {
     private final FloatBuffer vertices;
     private final FloatBuffer texCoords;
     private final IntBuffer indices;
+    private final int[] buffers;
+    private final int[] vertexArrays;
+    private final int[] textures;
     private final float[] mvp;
     private int program = 0;
     private int mvpLocation = 0;
-    private final int[] textures;
     private SurfaceTexture surfaceTexture = null;
     private int screenWidth = 0;
     private int screenHeight = 0;
@@ -106,8 +108,9 @@ class GLES30WallpaperRenderer extends GLWallpaperRenderer {
         ).order(ByteOrder.nativeOrder()).asIntBuffer();
         indices.put(indexArray).position(0);
 
+        vertexArrays = new int[1];
+        buffers = new int[3];
         textures = new int[1];
-
         mvp = new float[] {
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
@@ -124,7 +127,6 @@ class GLES30WallpaperRenderer extends GLWallpaperRenderer {
         GLES30.glDisable(GLES30.GL_CULL_FACE);
         GLES30.glDisable(GLES30.GL_BLEND);
 
-        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
         GLES30.glGenTextures(textures.length, textures, 0);
         GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0]);
         GLES30.glTexParameteri(
@@ -157,18 +159,48 @@ class GLES30WallpaperRenderer extends GLWallpaperRenderer {
             )
         );
         mvpLocation = GLES30.glGetUniformLocation(program, "mvp");
-        // Position is set in shader sources.
-        GLES30.glVertexAttribPointer(
-            0, 2, GLES30.GL_FLOAT,
-            false, 0, vertices
-        );
-        GLES30.glVertexAttribPointer(
-            1, 2, GLES30.GL_FLOAT,
-            false, 0, texCoords
-        );
 
+        GLES30.glGenBuffers(buffers.length, buffers, 0);
+
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, buffers[0]);
+        GLES30.glBufferData(
+            GLES30.GL_ARRAY_BUFFER, vertices.capacity() * BYTES_PER_FLOAT,
+            vertices, GLES30.GL_STATIC_DRAW
+        );
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
+
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, buffers[1]);
+        GLES30.glBufferData(
+            GLES30.GL_ARRAY_BUFFER, texCoords.capacity() * BYTES_PER_FLOAT,
+            texCoords, GLES30.GL_STATIC_DRAW
+        );
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
+
+        GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, buffers[2]);
+        GLES30.glBufferData(
+            GLES30.GL_ELEMENT_ARRAY_BUFFER, indices.capacity() * BYTES_PER_INT,
+            indices, GLES30.GL_STATIC_DRAW
+        );
+        GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        // Locations are set in shader sources.
+        GLES30.glGenVertexArrays(vertexArrays.length, vertexArrays, 0);
+
+        GLES30.glBindVertexArray(vertexArrays[0]);
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, buffers[0]);
         GLES30.glEnableVertexAttribArray(0);
+        GLES30.glVertexAttribPointer(
+            0, 2, GLES30.GL_FLOAT, false, 2 * BYTES_PER_FLOAT, 0
+        );
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, buffers[1]);
         GLES30.glEnableVertexAttribArray(1);
+        GLES30.glVertexAttribPointer(
+            1, 2, GLES30.GL_FLOAT, false, 2 * BYTES_PER_FLOAT, 0
+        );
+        GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, buffers[2]);
+        GLES30.glBindVertexArray(0);
+
+        GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
     @Override
@@ -190,12 +222,16 @@ class GLES30WallpaperRenderer extends GLWallpaperRenderer {
             // );
         }
 
-        GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT);
         GLES30.glUseProgram(program);
         GLES30.glUniformMatrix4fv(mvpLocation, 1, false, mvp, 0);
-        GLES30.glDrawElements(GLES30.GL_TRIANGLES, 6, GLES30.GL_UNSIGNED_INT, indices);
+        GLES30.glBindVertexArray(vertexArrays[0]);
+        GLES30.glDrawElements(GLES30.GL_TRIANGLES, 6, GLES30.GL_UNSIGNED_INT, 0);
+        GLES30.glBindVertexArray(0);
+        GLES30.glUseProgram(0);
     }
+
+
 
     @Override
     void setSourcePlayer(@NonNull final SimpleExoPlayer exoPlayer) {
