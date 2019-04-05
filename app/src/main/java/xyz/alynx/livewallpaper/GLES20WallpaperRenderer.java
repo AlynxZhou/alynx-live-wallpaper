@@ -186,7 +186,6 @@ class GLES20WallpaperRenderer extends GLWallpaperRenderer {
         );
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
-
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
