@@ -227,17 +227,6 @@ public class MainActivity extends AppCompatActivity
             createTipsDialog();
             break;
         }
-        case R.id.action_reward: {
-            final Intent intent = new Intent(this, RewardActivity.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                startActivity(
-                    intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
-                );
-            } else {
-                startActivity(intent);
-            }
-            break;
-        }
         case R.id.action_about: {
             final Intent intent = new Intent(this, AboutActivity.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

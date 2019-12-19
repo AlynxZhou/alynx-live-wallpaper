@@ -18,8 +18,8 @@
     <string name="no_thumbnail">Failed to generate thumbnail for %s</string>
     <string name="app_detail">This is a live wallpaper app which allows you to choose video as wallpaper.\n\nNeeds GLESv2 or higher version support for video cutting.\n\nSome icon are gotten from https://www.flaticon.com/, thanks to author Freepik for app icon, Hanan for add icon on button and Daniel Bruce for check icon on button.\n\nVideo Fire Rain is gotten from https://www.videvo.net/, thanks to author aRTHOR.</string>
     <string name="app_author">Alynx Zhou</string>
-    <string name="app_author_link">https://alynx.xyz/</string>
-    <string name="app_link">Project homepage: https://livewallpaper.alynx.xyz/</string>
+    <string name="app_author_link">https://alynx.moe/</string>
+    <string name="app_link">Project homepage: https://livewallpaper.alynx.moe/</string>
     <string name="app_version">Version %s (%d) %s</string>
     <string name="empty_name_or_path">Cannot add wallpaper with empty name or path</string>
     <string name="invalid_path">Wallpaper path invalid, loading default…</string>
@@ -28,13 +28,6 @@
     <string name="action_disallow_slide">Disallow Slide</string>
     <string name="slide_warning">On some low performance device, frequently sliding may leads to stuck.</string>
     <string name="gles_version">Needs to support GLESv2 or higher version!</string>
-    <string name="action_reward">Reward</string>
-    <string name="support_author">Support Author</string>
-    <string name="a_cup_of_coffee">Because I want to help others learn Android from my project, I released code as an open-source project.\n\nI spent quite a lot time on this app, and get no payment from it till now.\n\nBut if you like it and wants to support this collage student a cup of coffee, you can use following ways to reward me.</string>
-    <string name="alipay">Alipay</string>
-    <string name="wechatpay">WeChatPay</string>
-    <string name="paypal">PayPal</string>
-    <string name="paypal_link">http://paypal.me/AlynxZhou</string>
     <string name="tips_content">Here are some tips for users:\n\nTap thumbnails in list to preview a wallpaper.\n\nTap \"APPLY\" button to apply a wallpaper.\n\nTap bottom-right \"add\" button to add your video as wallpaper.\n\nIf you want to remove a wallpaper from list, you can find \"Remove\" in menu.\n\nIf you choose a video as current wallpaper, don\'t remove the original video file, because this app needs to read it.\n\nYou will back to this app if you touch \"Settings\" button in preview, it\'s not a bug, because this app\'s settings are inside the menu of main activity, not other activities.\n\nSome system (like some devices from Xiaomi and Huawei) limits that you can only set live wallpaper to desktop, not lock screen, this is not a problem that can be solved by this app.\n\nIf you added a video on external MicroSD card and set it as wallpaper, this app may not load it automatically after reboot, because it cannot get persistable permission for external MicroSD card, so try to move video to internal storage.\n\n\nFor Xiaomi users:\n\nBy default MIUI disabled System Document Content Provider, which is used by this app to choose file. Please go to \"Settings\" - \"More Apps\" - touch menu \"Show system apps\" - find \"Documents\" and enable it.\n\nSome Xiaomi device (like MIX 2) cannot set wallpaper in this app, after previewing and applying wallpaper in this app please go to your system\'s wallpaper settings, choose live wallpaper, then select \"Alynx Live Wallpaper\" to apply it.\n\n\nFor Vivo / Oppo users:\n\nIf you find two or more apps that can preview wallpaper after touch thumbnails, please try them one by one and find which one is available.\n\n\nFor OnePlus 3 / 3T users:\n\nThere is a bug that when you turn off screen you will see a piece of wallpaper blink into black while animating. It seems to be a system or OpenGL driver issue from OnePlus. Anyone knows how to solve it please contact me.\n\n\nFor Samsung users:\n\nActually this app implements \"Infinity Wallpaper\", you just need to enable slide in menu. But Samsung gives no document about how to declare a live wallpaper support this feature. So when you choose it, you will still see a toast say it does not support this feature.</string>
     <string name="action_tips">Tips</string>
     <string name="action_apply">Apply</string>
