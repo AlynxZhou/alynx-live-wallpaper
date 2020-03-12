@@ -17,8 +17,8 @@
     <string name="no_thumbnail">为 %s 生成缩略图失败</string>
     <string name="app_detail">一个支持选择视频作为动态壁纸的应用。\n\n为了剪裁视频尺寸，需要设备支持 GLESv2 或更高版本。\n\n一些图标获取自 flaticon.com，感谢应用图标的作者 Freepik、添加按钮图标的作者 Hanan 和完成按钮图标的作者 Daniel Bruce。视频火之雨来自 videvo.net，感谢作者 aRTHUR。</string>
     <string name="app_author">Alynx Zhou</string>
-    <string name="app_author_link">https://alynx.moe/</string>
-    <string name="app_link">项目主页：https://livewallpaper.alynx.moe/</string>
+    <string name="app_author_link">https://alynx.one/</string>
+    <string name="app_link">项目主页：https://livewallpaper.alynx.one/</string>
     <string name="app_version">版本 %s (%d) %s</string>
     <string name="empty_name_or_path">无法添加名称或路径为空的壁纸</string>
     <string name="invalid_path">壁纸路径无效，加载默认值……</string>

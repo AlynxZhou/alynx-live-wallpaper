@@ -18,8 +18,8 @@
     <string name="no_thumbnail">Failed to generate thumbnail for %s</string>
     <string name="app_detail">This is a live wallpaper app which allows you to choose video as wallpaper.\n\nNeeds GLESv2 or higher version support for video cutting.\n\nSome icon are gotten from https://www.flaticon.com/, thanks to author Freepik for app icon, Hanan for add icon on button and Daniel Bruce for check icon on button.\n\nVideo Fire Rain is gotten from https://www.videvo.net/, thanks to author aRTHOR.</string>
     <string name="app_author">Alynx Zhou</string>
-    <string name="app_author_link">https://alynx.moe/</string>
-    <string name="app_link">Project homepage: https://livewallpaper.alynx.moe/</string>
+    <string name="app_author_link">https://alynx.one/</string>
+    <string name="app_link">Project homepage: https://livewallpaper.alynx.one/</string>
     <string name="app_version">Version %s (%d) %s</string>
     <string name="empty_name_or_path">Cannot add wallpaper with empty name or path</string>
     <string name="invalid_path">Wallpaper path invalid, loading default…</string>
