@@ -6,8 +6,8 @@ android {
         applicationId "xyz.alynx.livewallpaper"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 32
-        versionName "1.4.3"
+        versionCode 33
+        versionName "1.4.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resConfigs "en", "zh_CN"
         vectorDrawables {
