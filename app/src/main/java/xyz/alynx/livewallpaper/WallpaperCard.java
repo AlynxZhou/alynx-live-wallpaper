@@ -42,17 +42,20 @@ public class WallpaperCard {
     private final Bitmap thumbnail;
     private boolean valid = true;
     private final Type type;
+    private int videoWith;
+    private int videoHeight;
+    private int videoRotation;
 
     // INTERNAL means this video is bundled into app assets.
     // So it cannot be removed.
     public enum Type {INTERNAL, EXTERNAL}
 
-    WallpaperCard(
-        @NonNull final String name,
-        @NonNull final String path,
-        @NonNull final Uri uri,
-        @NonNull final Type type,
-        final Bitmap thumbnail
+    public WallpaperCard(
+            @NonNull final String name,
+            @NonNull final String path,
+            @NonNull final Uri uri,
+            @NonNull final Type type,
+            final Bitmap thumbnail
     ) {
         setName(name);
         setPath(path);
@@ -131,6 +134,30 @@ public class WallpaperCard {
     @NonNull
     Type getType() {
         return type;
+    }
+
+    public void setVideoWith(int videoWith) {
+        this.videoWith = videoWith;
+    }
+
+    public void setVideoHeight(int videoHeight) {
+        this.videoHeight = videoHeight;
+    }
+
+    public void setVideoRotation(int videoRotation) {
+        this.videoRotation = videoRotation;
+    }
+
+    public int getVideoHeight() {
+        return videoHeight;
+    }
+
+    public int getVideoWith() {
+        return videoWith;
+    }
+
+    public int getVideoRotation() {
+        return videoRotation;
     }
 
     JSONObject toJSON() throws JSONException {

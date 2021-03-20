@@ -38,4 +38,12 @@
     <string name="applied_wallpaper">Applied wallpaper %s</string>
     <string name="current">Current</string>
     <string name="choose_file">Choose file with button…</string>
+
+    <string name="action_setting">Setting</string>
+    <string name="auto_switch">Switch wallpapers automatically</string>
+    <string name="auto_switch_desc">Switch after the wallpaper has been played</string>
+    <string name="double_switch">Double Switch</string>
+    <string name="double_switch_desc">Double-click home screen to switch wallpapers</string>
+    <string name="allow_volume">Enable video sound</string>
+    <string name="allow_volume_desc">If the video has audio, the audio plays. Silent by default</string>
 </resources>

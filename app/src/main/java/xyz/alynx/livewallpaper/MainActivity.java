@@ -42,9 +42,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -54,7 +54,6 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -178,41 +177,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        final MenuItem toggleSlideMenuItem = menu.findItem(R.id.action_toggle_slide);
-        final SharedPreferences pref = getSharedPreferences(
-            LWApplication.OPTIONS_PREF, MODE_PRIVATE
-        );
-        if (pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false)) {
-            toggleSlideMenuItem.setTitle(R.string.action_disallow_slide);
-        } else {
-            toggleSlideMenuItem.setTitle(R.string.action_allow_slide);
-        }
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
-        case R.id.action_toggle_slide: {
-            final SharedPreferences pref = getSharedPreferences(
-                LWApplication.OPTIONS_PREF, MODE_PRIVATE
-            );
-            final SharedPreferences.Editor editor = pref.edit();
-            final boolean newValue = !pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false);
-            editor.putBoolean(LWApplication.SLIDE_WALLPAPER_KEY, newValue);
-            editor.apply();
-            if (newValue) {
-                Snackbar.make(
-                    coordinatorLayout,
-                    R.string.slide_warning,
-                    Snackbar.LENGTH_LONG
-                ).show();
-                item.setTitle(R.string.action_disallow_slide);
-            } else {
-                item.setTitle(R.string.action_allow_slide);
-            }
-            break;
-        }
         case R.id.action_remove: {
             Snackbar.make(
                 coordinatorLayout,
@@ -225,6 +195,11 @@ public class MainActivity extends AppCompatActivity
         }
         case R.id.action_tips: {
             createTipsDialog();
+            break;
+        }
+        case R.id.action_setting:{
+            Intent intent = new Intent(this,AppSettingActivity.class);
+            startActivity(intent);
             break;
         }
         case R.id.action_about: {
@@ -253,11 +228,7 @@ public class MainActivity extends AppCompatActivity
             final FileOutputStream fos = openFileOutput(LWApplication.JSON_FILE_NAME, Context.MODE_PRIVATE);
             fos.write(json.toString(2).getBytes());
             fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
     }
@@ -301,11 +272,7 @@ public class MainActivity extends AppCompatActivity
             }
             bufferedReader.close();
             fis.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
     }
@@ -351,6 +318,7 @@ public class MainActivity extends AppCompatActivity
             addDialog.show();
         } else {
             LWApplication.setCurrentWallpaperCard(this, wallpaperCard);
+            AppConfig.setIsChange(true);
             cardAdapter.notifyDataSetChanged();
             // Display a notice for user.
             Snackbar.make(

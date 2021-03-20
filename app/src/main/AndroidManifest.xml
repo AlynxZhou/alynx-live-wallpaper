@@ -36,6 +36,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+        <activity android:name=".AppSettingActivity" />
+
         <service
             android:name=".GLWallpaperService"
             android:permission="android.permission.BIND_WALLPAPER">

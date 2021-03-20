@@ -38,4 +38,12 @@
     <string name="applied_wallpaper">已应用壁纸 %s</string>
     <string name="current">当前</string>
     <string name="choose_file">点击按钮选择文件……</string>
+
+    <string name="action_setting">设置</string>
+    <string name="auto_switch">自动切换壁纸</string>
+    <string name="auto_switch_desc">在当前壁纸播放完毕后切换</string>
+    <string name="double_switch">双击切换</string>
+    <string name="double_switch_desc">双击主屏幕切换壁纸</string>
+    <string name="allow_volume">开启音频</string>
+    <string name="allow_volume_desc">如果支持,则会播放音频.默认无声</string>
 </resources>
