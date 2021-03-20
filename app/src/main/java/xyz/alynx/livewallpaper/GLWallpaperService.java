@@ -17,17 +17,18 @@
 package xyz.alynx.livewallpaper;
 
 import android.app.ActivityManager;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.opengl.GLSurfaceView;
-import android.os.ParcelFileDescriptor;
 import android.service.wallpaper.WallpaperService;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
@@ -42,9 +43,17 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
-import java.io.FileNotFoundException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  *
@@ -62,10 +71,7 @@ import java.util.List;
  * And when we get a current WallpaperCard, we save it to SharedPreference for further loading.
  *
  */
-public class GLWallpaperService extends WallpaperService {
-    @SuppressWarnings("unused")
-    private static final String TAG = "GLWallpaperService";
-
+public class GLWallpaperService extends WallpaperService{
     class GLWallpaperEngine extends Engine {
         private static final String TAG = "GLWallpaperEngine";
         private final Context context;
@@ -80,16 +86,17 @@ public class GLWallpaperService extends WallpaperService {
         private int videoRotation = 0;
         private int videoWidth = 0;
         private int videoHeight = 0;
-        private long progress = 0;
 
+        private Player.EventListener mListener;
+        private List<WallpaperCard> mExternalCards;
+        private GestureDetector mGestureDetector;
+        private int mIndex = 0;
+        private boolean mVisibility;
+        private boolean playing;
         private class GLWallpaperSurfaceView extends GLSurfaceView {
-            @SuppressWarnings("unused")
-            private static final String TAG = "GLWallpaperSurface";
-
             public GLWallpaperSurfaceView(Context context) {
                 super(context);
             }
-
             /**
              * This is a hack. Because Android Live Wallpaper only has a Surface.
              * So we create a GLSurfaceView, and when drawing to its Surface,
@@ -110,11 +117,6 @@ public class GLWallpaperService extends WallpaperService {
             setTouchEventsEnabled(false);
         }
 
-        // @Override
-        // public void onTouchEvent(MotionEvent event) {
-        //     super.onTouchEvent(event);
-        // }
-
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
@@ -122,6 +124,75 @@ public class GLWallpaperService extends WallpaperService {
                 LWApplication.OPTIONS_PREF, MODE_PRIVATE
             );
             allowSlide = pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false);
+            loadExternalWallpapers();
+        }
+
+        private void initGestureDetector(){
+            if(AppConfig.isDoubleSwitch()){
+                if(mGestureDetector == null){
+                    mGestureDetector = new GestureDetector(GLWallpaperService.this,new GestureDetector.SimpleOnGestureListener(){
+                        @Override
+                        public boolean onDoubleTap(MotionEvent e) {
+                            playing = false;
+                            startPlayer(mExternalCards.get(getIndex(mExternalCards.size())));
+                            return super.onDoubleTap(e);
+                        }
+                    });
+                }
+            }else{
+                mGestureDetector = null;
+            }
+        }
+
+        private void loadExternalWallpapers(){
+            Utils.debug(TAG,"load external wallpapers to externalCards...");
+            File file = new File(getFilesDir() + File.separator + "data.json");
+            if(!file.exists()){
+                return;
+            }
+            String jsonStr = read(file);
+
+            if(TextUtils.isEmpty(jsonStr)){
+                return;
+            }
+            mExternalCards = new ArrayList<>(10);
+            try {
+                JSONObject dataJsonObj = new JSONObject(jsonStr);
+                JSONArray dataArray = dataJsonObj.getJSONArray("cards");
+                int size = dataArray.length();
+                for(int i = 0;i < size;i++){
+                    JSONObject object = dataArray.getJSONObject(i);
+                    WallpaperCard card = new WallpaperCard(
+                            object.getString("name"),
+                            object.getString("path"),
+                            Uri.parse(object.getString("path")),
+                            WallpaperCard.Type.EXTERNAL,
+                            null
+                    );
+                    mExternalCards.add(card);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        String read(File file){
+            if(file == null){
+                Utils.debug("FileUtils","要读取的file为空!");
+                return null;
+            }
+            try{
+                BufferedReader in = new BufferedReader(new FileReader(file));
+                String str;
+                StringBuilder sb = new StringBuilder();
+                while ((str = in.readLine()) != null){
+                    sb.append(str);
+                }
+                return sb.toString();
+            }catch (Exception e){
+                Utils.debug("FileUtils",e.getMessage());
+            }
+            return null;
         }
 
         @Override
@@ -131,12 +202,22 @@ public class GLWallpaperService extends WallpaperService {
             int width = surfaceHolder.getSurfaceFrame().width();
             int height = surfaceHolder.getSurfaceFrame().height();
             renderer.setScreenSize(width, height);
-            startPlayer();
+            startPlayer(wallpaperCard);
+        }
+
+        @Override
+        public void onTouchEvent(MotionEvent event) {
+            if(mGestureDetector != null){
+                mGestureDetector.onTouchEvent(event);
+            }else{
+                super.onTouchEvent(event);
+            }
         }
 
         @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
+            initGestureDetector();
             if (renderer != null) {
                 if (visible) {
                     final SharedPreferences pref = getSharedPreferences(
@@ -144,8 +225,10 @@ public class GLWallpaperService extends WallpaperService {
                     );
                     allowSlide = pref.getBoolean(LWApplication.SLIDE_WALLPAPER_KEY, false);
                     glSurfaceView.onResume();
-                    startPlayer();
+                    mVisibility = true;
+                    startPlayer(null);
                 } else {
+                    mVisibility = false;
                     stopPlayer();
                     glSurfaceView.onPause();
                     // Prevent useless renderer calculating.
@@ -181,6 +264,9 @@ public class GLWallpaperService extends WallpaperService {
         @Override
         public void onSurfaceDestroyed(SurfaceHolder holder) {
             super.onSurfaceDestroyed(holder);
+            if(mListener != null && exoPlayer != null){
+                exoPlayer.removeListener(mListener);
+            }
             stopPlayer();
             glSurfaceView.onDestroy();
         }
@@ -216,79 +302,16 @@ public class GLWallpaperService extends WallpaperService {
             glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         }
 
-        private boolean checkWallpaperCardValid() {
-            if (wallpaperCard == null) {
-                return false;
-            }
-            if (wallpaperCard.getType() == WallpaperCard.Type.INTERNAL) {
-                return true;
-            }
-            boolean res = true;
-            // Ask persistable permission here because AddCardTask may not have context.
-            getContentResolver().takePersistableUriPermission(
-                wallpaperCard.getUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION
-            );
-            try {
-                final ContentResolver resolver = getContentResolver();
-                final ParcelFileDescriptor pfd = resolver.openFileDescriptor(
-                    wallpaperCard.getUri(), "r"
-                );
-                if (pfd == null) {
-                    res = false;
-                } else {
-                    pfd.close();
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                res = false;
-            } catch (IOException e) {
-                e.printStackTrace();
-                res = false;
-            }
-            return res;
-        }
-
-        private void loadWallpaperCard() {
-            oldWallpaperCard = wallpaperCard;
-            if (isPreview()) {
-                wallpaperCard = LWApplication.getPreviewWallpaperCard();
-            } else {
-                wallpaperCard = LWApplication.getCurrentWallpaperCard(context);
-            }
-            if (!checkWallpaperCardValid()) {
-                if (wallpaperCard != null) {
-                    // File is removed by user.
-                    Toast.makeText(context, R.string.invalid_path, Toast.LENGTH_LONG).show();
-                    wallpaperCard.setInvalid();
-                }
-                // Load default wallpaper.
-                final List<WallpaperCard> cards = LWApplication.getCards(context);
-                if (cards.size() > 0 && cards.get(0) != null) {
-                    wallpaperCard = cards.get(0);
-                } else {
-                    wallpaperCard = null;
-                    Toast.makeText(context, R.string.default_failed, Toast.LENGTH_LONG).show();
-                    throw new RuntimeException("Failed to fallback to internal wallpaper");
-                }
-            }
-        }
-
         private void getVideoMetadata() throws IOException {
             final MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-            switch (wallpaperCard.getType()) {
-            case INTERNAL:
+            if(wallpaperCard.getType() == WallpaperCard.Type.INTERNAL){
                 final AssetFileDescriptor afd = getAssets().openFd(wallpaperCard.getPath());
-                mmr.setDataSource(
-                    afd.getFileDescriptor(),
-                    afd.getStartOffset(),
-                    afd.getDeclaredLength()
-                );
+                mmr.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getDeclaredLength());
                 afd.close();
-                break;
-            case EXTERNAL:
-                mmr.setDataSource(context, wallpaperCard.getUri());
-                break;
+            }else if(wallpaperCard.getType() == WallpaperCard.Type.EXTERNAL){
+                mmr.setDataSource(context,wallpaperCard.getUri());
             }
+
             final String rotation = mmr.extractMetadata(
                 MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION
             );
@@ -298,69 +321,152 @@ public class GLWallpaperService extends WallpaperService {
             final String height = mmr.extractMetadata(
                 MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT
             );
-            mmr.release();
             videoRotation = Integer.parseInt(rotation);
             videoWidth = Integer.parseInt(width);
             videoHeight = Integer.parseInt(height);
+
+            mmr.release();
         }
 
-        private void startPlayer() {
-            if (exoPlayer != null) {
-                stopPlayer();
-            }
-            Utils.debug(TAG, "Player starting");
-            loadWallpaperCard();
-            if (wallpaperCard == null) {
-                // gg
+        private void startPlayer(WallpaperCard card){
+            Utils.debug(TAG,"Player starting...");
+            //Prevent reloading after visibility changes
+            if(mVisibility && playing && !AppConfig.isIsChange()){
+                exoPlayer.setPlayWhenReady(true);
                 return;
             }
-            try {
-                getVideoMetadata();
-            } catch (IOException e) {
-                e.printStackTrace();
-                // gg
-                return;
+            if(isPreview()){
+                wallpaperCard = LWApplication.getPreviewWallpaperCard();
+            }else{
+                wallpaperCard = LWApplication.getCurrentWallpaperCard(GLWallpaperService.this);
             }
-            trackSelector = new DefaultTrackSelector();
-            exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
-            exoPlayer.setVolume(0.0f);
-            // Disable audio decoder.
-            final int count = exoPlayer.getRendererCount();
-            for (int i = 0; i < count; ++i) {
-                if (exoPlayer.getRendererType(i) == C.TRACK_TYPE_AUDIO) {
-                    trackSelector.setParameters(
-                        trackSelector.buildUponParameters().setRendererDisabled(i, true)
-                    );
+            if(card != null){
+                wallpaperCard = card;
+                wallpaperCard.setVideoRotation(0);
+                wallpaperCard.setVideoWith(0);
+                wallpaperCard.setVideoHeight(0);
+                if(card.getPath().equals(oldWallpaperCard.getPath())){
+                    Utils.debug(TAG,"要切换的壁纸一致,跳过...");
+                    return;
                 }
             }
-            exoPlayer.setRepeatMode(Player.REPEAT_MODE_ALL);
+            if(wallpaperCard == null){
+                return;
+            }
+            oldWallpaperCard = wallpaperCard;
+            if(wallpaperCard.getVideoHeight() == 0 || wallpaperCard.getVideoWith() == 0){
+                try {
+                    getVideoMetadata();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                wallpaperCard.setVideoHeight(videoHeight);
+                wallpaperCard.setVideoWith(videoWidth);
+                wallpaperCard.setVideoRotation(videoRotation);
+            }
+
+            initExoPlayer();
+            setVideoSource();
+        }
+
+        private void initExoPlayer(){
+            if(exoPlayer == null){
+                trackSelector = new DefaultTrackSelector();
+                exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+                exoPlayer.setRepeatMode(Player.REPEAT_MODE_ALL);
+                mListener = new Player.EventListener() {
+                    @Override
+                    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                        if(playbackState == Player.STATE_ENDED){
+                            Utils.debug(TAG,"the end...");
+                            playing = false;
+                            initExoPlayer();
+                            startPlayer(mExternalCards.get(getIndex(mExternalCards.size())));
+                        }
+                    }
+                };
+                exoPlayer.addListener(mListener);
+            }
+            if(!AppConfig.isAllowVolume()){
+                exoPlayer.setVolume(0.0f);
+                // Disable audio decoder.
+                final int count = exoPlayer.getRendererCount();
+                for (int i = 0; i < count; ++i) {
+                    if (exoPlayer.getRendererType(i) == C.TRACK_TYPE_AUDIO) {
+                        trackSelector.setParameters(
+                                trackSelector.buildUponParameters().setRendererDisabled(i, true)
+                        );
+                    }
+                }
+            }
+            else
+            {
+                if(exoPlayer.getVolume() <= 0){
+                   exoPlayer.setVolume(1.0f);
+                }
+                final int count = exoPlayer.getRendererCount();
+                for (int i = 0; i < count; ++i) {
+                    if (exoPlayer.getRendererType(i) == C.TRACK_TYPE_AUDIO) {
+                        trackSelector.setParameters(
+                                trackSelector.buildUponParameters().setRendererDisabled(i, false)
+                        );
+                    }
+                }
+            }
+            if(AppConfig.isAllowAutoSwitch()){
+                exoPlayer.setRepeatMode(Player.REPEAT_MODE_OFF);
+            }else{
+                exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+            }
+        }
+
+        private void setVideoSource(){
+            //Utils.debug(TAG,"getVideoMetadata()所消耗的时间:" + (endTime - startTime) + "ms");
+
             final DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(
-                context, Util.getUserAgent(context, "xyz.alynx.livewallpaper")
+                    context, Util.getUserAgent(context, "xyz.alynx.livewallpaper")
             );
             // ExoPlayer can load file:///android_asset/ uri correctly.
             videoSource = new ExtractorMediaSource.Factory(
-                dataSourceFactory
+                    dataSourceFactory
             ).createMediaSource(wallpaperCard.getUri());
             // Let we assume video has correct info in metadata, or user should fix it.
-            renderer.setVideoSizeAndRotation(videoWidth, videoHeight, videoRotation);
+            renderer.setVideoSizeAndRotation(wallpaperCard.getVideoWith(), wallpaperCard.getVideoHeight(), wallpaperCard.getVideoRotation());
             // This must be set after getting video info.
             renderer.setSourcePlayer(exoPlayer);
             exoPlayer.prepare(videoSource);
-            // ExoPlayer's video size changed listener is buggy. Don't use it.
-            // It give's width and height after rotation, but did not rotate frames.
-            if (oldWallpaperCard != null &&
-                oldWallpaperCard.equals(wallpaperCard)) {
-                exoPlayer.seekTo(progress);
-            }
             exoPlayer.setPlayWhenReady(true);
+            playing = true;
+            AppConfig.setIsChange(false);
+            //Utils.debug(TAG,"setVideoSource..所消耗的时间:" + (endTime - startTime) + "ms");
+        }
+
+        private int getIndex(int range){
+            if(mExternalCards.size() == 1){
+                return 0;
+            }
+            Random random = new Random();
+            int num = random.nextInt(range);
+            if(num == mIndex){
+                if(num + 1 == range){
+                    num = 0;
+                }else{
+                    num++;
+                }
+            }
+            mIndex = num;
+            return num;
         }
 
         private void stopPlayer() {
+            if(!mVisibility){
+                exoPlayer.setPlayWhenReady(false);
+                return;
+            }
             if (exoPlayer != null) {
                 if (exoPlayer.getPlayWhenReady()) {
                     Utils.debug(TAG, "Player stopping");
                     exoPlayer.setPlayWhenReady(false);
-                    progress = exoPlayer.getCurrentPosition();
                     exoPlayer.stop();
                 }
                 exoPlayer.release();

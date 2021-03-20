@@ -45,6 +45,21 @@ public class LWApplication extends Application {
     private static List<WallpaperCard> cards = null;
     private static WallpaperCard currentWallpaperCard = null;
     private static WallpaperCard previewWallpaperCard = null;
+    private static boolean isChange = false;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        initConfig();
+    }
+
+    private void initConfig(){
+        SharedPreferences preferences = getSharedPreferences(OPTIONS_PREF,MODE_PRIVATE);
+        AppConfig.setAllowAutoSwitch(preferences.getBoolean(AppConfig.ALLOW_AUTO_SWITCH,false));
+        AppConfig.setAllowVolume(preferences.getBoolean(AppConfig.ALLOW_VOLUME,false));
+        AppConfig.setDoubleSwitch(preferences.getBoolean(AppConfig.DOUBLE_SWITCH,true));
+    }
 
     @NonNull
     public static List<WallpaperCard> getCards(@NonNull final Context context) {
