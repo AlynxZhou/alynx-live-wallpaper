@@ -83,10 +83,6 @@ class GLWallpaperService : WallpaperService() {
             }
         }
 
-        // @Override
-        // public void onTouchEvent(MotionEvent event) {
-        //     super.onTouchEvent(event);
-        // }
         override fun onCreate(
                 surfaceHolder: SurfaceHolder) {
             super.onCreate(surfaceHolder)
