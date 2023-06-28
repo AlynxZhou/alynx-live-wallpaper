@@ -17,9 +17,7 @@ package xyz.alynx.livewallpaper
 
 import android.graphics.Bitmap
 import android.net.Uri
-import org.json.JSONException
-import org.json.JSONObject
-import xyz.alynx.livewallpaper.LWApplication.Companion.isCurrentWallpaperCard
+import org.json.*
 
 /**
  *
@@ -27,45 +25,42 @@ import xyz.alynx.livewallpaper.LWApplication.Companion.isCurrentWallpaperCard
  *
  */
 class WallpaperCard internal constructor(
-        path: String,
-        uri: Uri,
-        val type: Type,
-        val thumbnail: Bitmap?
+    @JvmField
+    val name: String,
+    @JvmField
+    val path: String,
+    @JvmField
+    val uri: Uri,
+    @JvmField
+    val type: Type,
+    @JvmField
+    val thumbnail: Bitmap?
 ) {
-    var name: String? = null
-        private set
 
     // It's hard to access file path with Android built-in file chooser.
     // So actually path is a path.
-    var path: String = path
-        private set
-    var uri: Uri = uri
-        private set
     var isValid = true
         private set
 
     // INTERNAL means this video is bundled into app assets.
     // So it cannot be removed.
     enum class Type {
-        INTERNAL, EXTERNAL
+        INTERNAL,
+        EXTERNAL
     }
 
-
     /**
-     * @return boolean true for removable, false for not.
+     * @param card WallpaperCard to compare.
+     * @return boolean true for equal, false for not.
      *
-     * Only EXTERNAL wallpaper can be removed.
+     * Only compare path, other parts are not matter.
      */
-    val isRemovable: Boolean
-        get() = type == Type.EXTERNAL
+    fun equals(card: WallpaperCard): Boolean {
+        return path == card.path
+    }
 
-    /**
-     * @return boolean true for current, false for not.
-     *
-     * Compare this to LWApplication's currentWallpaperCard.
-     */
-    val isCurrent: Boolean
-        get() = isCurrentWallpaperCard(this)
+    fun isRemovable(): Boolean = type == Type.EXTERNAL
+    fun isCurrent(): Boolean = LWApplication.isCurrentWallpaperCard(this)
 
     fun setInvalid() {
         isValid = false
@@ -83,17 +78,8 @@ class WallpaperCard internal constructor(
         return json
     }
 
-    /**
-     * Only compare path, other parts are not matter.
-     */
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is WallpaperCard) return false
-        if (path != other.path) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return path.hashCode()
+    companion object {
+        @Suppress("unused")
+        private val TAG = "WallpaperCard"
     }
 }

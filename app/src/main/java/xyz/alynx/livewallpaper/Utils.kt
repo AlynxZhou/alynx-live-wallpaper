@@ -15,7 +15,8 @@
  */
 package xyz.alynx.livewallpaper
 
-import android.content.Context
+import android.app.WallpaperManager
+import android.content.*
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
@@ -37,9 +38,10 @@ internal object Utils {
      *
      * Hacked from ThumbnailUtils.createVideoThumbnail()'s code.
      */
+    @JvmStatic
     fun createVideoThumbnailFromUri(
-            context: Context,
-            uri: Uri
+        context: Context,
+        uri: Uri
     ): Bitmap? {
         var bitmap: Bitmap? = null
         val retriever = MediaMetadataRetriever()
@@ -74,12 +76,20 @@ internal object Utils {
         return bitmap
     }
 
+    fun prepareSetCurrentAsLiveWallpaperIntent(): Intent {
+        val liveWallpaperIntent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER)
+        val p = GLWallpaperService::class.java.`package`!!.name
+        val c = GLWallpaperService::class.java.canonicalName!!
+        liveWallpaperIntent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT, ComponentName(p, c))
+        return liveWallpaperIntent
+    }
+
     @JvmStatic
     @Throws(RuntimeException::class)
     fun compileShaderResourceGLES30(
-            context: Context,
-            shaderType: Int,
-            shaderRes: Int
+        context: Context,
+        shaderType: Int,
+        shaderRes: Int
     ): Int {
         val inputStream = context.resources.openRawResource(shaderRes)
         val bufferedReader = BufferedReader(InputStreamReader(inputStream))
@@ -114,8 +124,8 @@ internal object Utils {
     @JvmStatic
     @Throws(RuntimeException::class)
     fun linkProgramGLES30(
-            vertShader: Int,
-            fragShader: Int
+        vertShader: Int,
+        fragShader: Int
     ): Int {
         val program = GLES30.glCreateProgram()
         if (program == 0) {
@@ -137,9 +147,9 @@ internal object Utils {
     @JvmStatic
     @Throws(RuntimeException::class)
     fun compileShaderResourceGLES20(
-            context: Context,
-            shaderType: Int,
-            shaderRes: Int
+        context: Context,
+        shaderType: Int,
+        shaderRes: Int
     ): Int {
         val inputStream = context.resources.openRawResource(shaderRes)
         val bufferedReader = BufferedReader(InputStreamReader(inputStream))
@@ -174,8 +184,8 @@ internal object Utils {
     @JvmStatic
     @Throws(RuntimeException::class)
     fun linkProgramGLES20(
-            vertShader: Int,
-            fragShader: Int
+        vertShader: Int,
+        fragShader: Int
     ): Int {
         val program = GLES20.glCreateProgram()
         if (program == 0) {

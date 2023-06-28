@@ -79,7 +79,7 @@ class AddCardTask(activity: AppCompatActivity, private val listener: AddCardTask
             return null
         }
         return WallpaperCard(
-                uri.toString(), uri, WallpaperCard.Type.EXTERNAL, thumbnail
+            name, uri.toString(), uri, WallpaperCard.Type.EXTERNAL, thumbnail
         )
     }
 

@@ -17,11 +17,9 @@ package xyz.alynx.livewallpaper
 
 import android.app.Application
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.*
 import android.net.Uri
-import org.json.JSONArray
-import org.json.JSONException
+import org.json.*
 import java.io.IOException
 import java.util.*
 
@@ -85,7 +83,7 @@ class LWApplication : Application() {
             } else {
                 uri = Uri.parse(path)
             }
-            return WallpaperCard(path, uri, type, null)
+            return WallpaperCard(name, path, uri, type, null)
         }
 
         private fun initCards(context: Context) {
@@ -99,10 +97,10 @@ class LWApplication : Application() {
                 e.printStackTrace()
             }
             cards!!.add(WallpaperCard(
-                    INTERNAL_WALLPAPER_VIDEO_PATH,
-                    Uri.parse(
+                context.resources.getString(R.string.fire_rain),
+                INTERNAL_WALLPAPER_VIDEO_PATH, Uri.parse(
                     "file:///android_asset/$INTERNAL_WALLPAPER_VIDEO_PATH"
-            ), WallpaperCard.Type.INTERNAL, thumbnail
+                ), WallpaperCard.Type.INTERNAL, thumbnail!!
             ))
         }
 

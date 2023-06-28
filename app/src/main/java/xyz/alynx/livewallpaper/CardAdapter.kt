@@ -59,7 +59,7 @@ internal class CardAdapter(
         } else {
             cardViewHolder.internal.visibility = View.GONE
         }
-        if (card.isCurrent) {
+        if (card.isCurrent()) {
             cardViewHolder.current.visibility = View.VISIBLE
             cardViewHolder.applyButton.visibility = View.GONE
         } else {
@@ -67,7 +67,7 @@ internal class CardAdapter(
             cardViewHolder.applyButton.visibility = View.VISIBLE
         }
         cardViewHolder.thumbnail.setImageBitmap(card.thumbnail)
-        if (removable && card.isRemovable && !card.isCurrent) {
+        if (removable && card.isRemovable() && !card.isCurrent()) {
             cardViewHolder.removeButton.visibility = View.VISIBLE
         } else {
             cardViewHolder.removeButton.visibility = View.GONE

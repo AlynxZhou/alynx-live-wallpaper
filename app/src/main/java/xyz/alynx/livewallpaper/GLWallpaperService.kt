@@ -23,9 +23,7 @@ import android.opengl.GLSurfaceView
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
 import android.widget.Toast
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
@@ -188,21 +186,20 @@ class GLWallpaperService : WallpaperService() {
         }
 
         private fun checkWallpaperCardValid(): Boolean {
-            if (wallpaperCard == null) {
-                return false
-            }
-            if (wallpaperCard!!.type === WallpaperCard.Type.INTERNAL) {
+            val wallpaperCard=wallpaperCard?:return false
+            if (wallpaperCard.type === WallpaperCard.Type.INTERNAL) {
                 return true
             }
             var res = true
             // Ask persistable permission here because AddCardTask may not have context.
+            val uri = wallpaperCard.uri
             contentResolver.takePersistableUriPermission(
-                    wallpaperCard!!.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
             try {
                 val resolver = contentResolver
                 val pfd = resolver.openFileDescriptor(
-                        wallpaperCard!!.uri, "r"
+                    uri, "r"
                 )
                 if (pfd == null) {
                     res = false
@@ -306,7 +303,7 @@ class GLWallpaperService : WallpaperService() {
                     context, Util.getUserAgent(context, "xyz.alynx.livewallpaper")
             )
             // ExoPlayer can load file:///android_asset/ uri correctly.
-            videoSource = ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(wallpaperCard!!.uri)
+            videoSource = ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(wallpaperCard!!.uri))
             // Let we assume video has correct info in metadata, or user should fix it.
             renderer!!.setVideoSizeAndRotation(videoWidth, videoHeight, videoRotation)
             // This must be set after getting video info.
