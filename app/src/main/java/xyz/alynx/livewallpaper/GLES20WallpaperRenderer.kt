@@ -21,7 +21,7 @@ import android.opengl.GLES11Ext
 import android.opengl.GLES20
 import android.opengl.Matrix
 import android.view.Surface
-import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.*
 import xyz.alynx.livewallpaper.Utils.compileShaderResourceGLES20
 import xyz.alynx.livewallpaper.Utils.debug
 import xyz.alynx.livewallpaper.Utils.linkProgramGLES20
@@ -162,7 +162,7 @@ internal class GLES20WallpaperRenderer(context: Context) : GLWallpaperRenderer(c
         GLES20.glUseProgram(0)
     }
 
-    override fun setSourcePlayer(exoPlayer: SimpleExoPlayer) {
+    override fun setSourcePlayer(exoPlayer: ExoPlayer) {
         // Re-create SurfaceTexture when getting a new player.
         // Because maybe a new video is loaded.
         createSurfaceTexture()

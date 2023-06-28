@@ -292,7 +292,7 @@ class MainActivity : AppCompatActivity(), OnCardClickedListener, AddCardTaskList
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle(R.string.choose_wallpaper_title)
                 builder.setMessage(R.string.choose_wallpaper)
-                builder.setPositiveButton(R.string.ok) { dialog, id ->
+                builder.setPositiveButton(R.string.ok) { _, _ ->
                     startActivity(Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER))
                 }
                 addDialog = builder.create()
@@ -381,8 +381,8 @@ class MainActivity : AppCompatActivity(), OnCardClickedListener, AddCardTaskList
         val builder = AlertDialog.Builder(this)
         builder.setTitle(R.string.add_wallpaper)
         builder.setView(layoutInflater.inflate(R.layout.add_wallpaper_dialog, null))
-        builder.setPositiveButton(R.string.ok) { dialog, id -> onAddCardConfirmed() }
-        builder.setNegativeButton(R.string.cancel) { dialog, id -> dialog.cancel() }
+        builder.setPositiveButton(R.string.ok) { _, _ -> onAddCardConfirmed() }
+        builder.setNegativeButton(R.string.cancel) { dialog, _ -> dialog.cancel() }
         addDialog = builder.create()
         addDialog!!.show()
         val button = addDialog!!.findViewById<Button>(R.id.choose_file_button) ?: return

@@ -27,9 +27,7 @@ import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.util.Util
+import com.google.android.exoplayer2.upstream.*
 import xyz.alynx.livewallpaper.LWApplication.Companion.getCards
 import xyz.alynx.livewallpaper.LWApplication.Companion.getCurrentWallpaperCard
 import xyz.alynx.livewallpaper.Utils.debug
@@ -55,7 +53,7 @@ import java.io.IOException
 class GLWallpaperService : WallpaperService() {
     inner class GLWallpaperEngine(private val context: Context) : Engine() {
         private var glSurfaceView: GLWallpaperSurfaceView? = null
-        private var exoPlayer: SimpleExoPlayer? = null
+        private var exoPlayer:  ExoPlayer? = null
         private var videoSource: MediaSource? = null
         private var trackSelector: DefaultTrackSelector? = null
         private var wallpaperCard: WallpaperCard? = null
@@ -283,7 +281,7 @@ class GLWallpaperService : WallpaperService() {
                 return
             }
             trackSelector = DefaultTrackSelector(context)
-            exoPlayer = SimpleExoPlayer.Builder(context).setTrackSelector(trackSelector!!).build()
+            exoPlayer = ExoPlayer.Builder(context).setTrackSelector(trackSelector!!).build()
             exoPlayer!!.volume = 0.0f
             // Disable audio decoder.
             val count = exoPlayer!!.rendererCount
@@ -295,16 +293,18 @@ class GLWallpaperService : WallpaperService() {
                 }
             }
             exoPlayer!!.repeatMode = Player.REPEAT_MODE_ALL
-            val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
-                    context, Util.getUserAgent(context, "xyz.alynx.livewallpaper")
-            )
+            val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(context)
+//            (
+//                    context, Util.getUserAgent(context, "xyz.alynx.livewallpaper")
+//            )
             // ExoPlayer can load file:///android_asset/ uri correctly.
             videoSource = ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(wallpaperCard!!.uri))
             // Let we assume video has correct info in metadata, or user should fix it.
             renderer!!.setVideoSizeAndRotation(videoWidth, videoHeight, videoRotation)
             // This must be set after getting video info.
             renderer!!.setSourcePlayer(exoPlayer!!)
-            exoPlayer!!.prepare(videoSource!!)
+            exoPlayer!!.setMediaSource(videoSource!!)
+            exoPlayer!!.prepare()
             // ExoPlayer's video size changed listener is buggy. Don't use it.
             // It give's width and height after rotation, but did not rotate frames.
             if (oldWallpaperCard != null &&

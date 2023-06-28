@@ -17,10 +17,10 @@ package xyz.alynx.livewallpaper
 
 import android.content.Context
 import android.opengl.GLSurfaceView
-import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.*
 
 abstract class GLWallpaperRenderer(@JvmField val context: Context) : GLSurfaceView.Renderer {
-    abstract fun setSourcePlayer(exoPlayer: SimpleExoPlayer)
+    abstract fun setSourcePlayer(exoPlayer: ExoPlayer)
     abstract fun setScreenSize(width: Int, height: Int)
     abstract fun setVideoSizeAndRotation(width: Int, height: Int, rotation: Int)
     abstract fun setOffset(xOffset: Float, yOffset: Float)
