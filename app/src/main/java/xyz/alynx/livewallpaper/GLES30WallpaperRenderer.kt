@@ -20,7 +20,10 @@ import android.graphics.SurfaceTexture
 import android.opengl.GLES11Ext
 import android.opengl.GLES30
 import android.opengl.Matrix
+import android.os.Looper
+import android.util.Log
 import android.view.Surface
+import androidx.annotation.*
 import com.google.android.exoplayer2.*
 import xyz.alynx.livewallpaper.Utils.compileShaderResourceGLES30
 import xyz.alynx.livewallpaper.Utils.debug
@@ -136,7 +139,9 @@ internal class GLES30WallpaperRenderer(context: Context) : GLWallpaperRenderer(c
         GLES30.glViewport(0, 0, width, height)
     }
 
+    @WorkerThread
     override fun onDrawFrame(gl10: GL10) {
+//        Log.d("AppLog", "onDrawFrame isUiThread:" + (Thread.currentThread().id == Looper.getMainLooper().thread.id))
         if (surfaceTexture == null) {
             return
         }
@@ -203,20 +208,8 @@ internal class GLES30WallpaperRenderer(context: Context) : GLWallpaperRenderer(c
     }
 
     override fun setOffset(xOffset: Float, yOffset: Float) {
-        var newXOffset = xOffset
-        var newYOffset = yOffset
-        if (newXOffset > maxXOffset) {
-            newXOffset = maxXOffset
-        }
-        if (newXOffset < -maxXOffset) {
-            newXOffset = -maxXOffset
-        }
-        if (newYOffset > maxYOffset) {
-            newYOffset = maxYOffset
-        }
-        if (newYOffset < -maxXOffset) {
-            newYOffset = -maxYOffset
-        }
+        val newXOffset = xOffset.coerceAtLeast(-maxXOffset).coerceAtMost(maxXOffset)
+        val newYOffset = yOffset.coerceAtLeast(-maxYOffset).coerceAtMost(maxYOffset)
         if (this.xOffset != newXOffset || this.yOffset != newYOffset) {
             this.xOffset = newXOffset
             this.yOffset = newYOffset
@@ -239,46 +232,48 @@ internal class GLES30WallpaperRenderer(context: Context) : GLWallpaperRenderer(c
         surfaceTexture!!.setOnFrameAvailableListener { ++updatedFrame }
     }
 
-    private fun updateMatrix() {
-        // Players are buggy and unclear, so we do crop by ourselves.
-        // Start with an identify matrix.
-        for (i in 0..15) {
-            mvp[i] = 0.0f
-        }
-        mvp[15] = 1.0f
-        mvp[10] = mvp[15]
-        mvp[5] = mvp[10]
-        mvp[0] = mvp[5]
-        // OpenGL model matrix: scaling, rotating, translating.
-        val videoRatio = videoWidth.toFloat() / videoHeight
-        val screenRatio = screenWidth.toFloat() / screenHeight
-        if (videoRatio >= screenRatio) {
-            debug(TAG, "X-cropping")
-            // Treat video and screen width as 1, and compare width to scale.
-            Matrix.scaleM(
-                    mvp, 0,
-                    videoWidth.toFloat() / videoHeight / (screenWidth.toFloat() / screenHeight), 1f, 1f)
-            // Some video recorder save video frames in direction differs from recoring,
-            // and add a rotation metadata. Need to detect and rotate them.
-            if (videoRotation % 360 != 0) {
-                Matrix.rotateM(mvp, 0, -videoRotation.toFloat(), 0f, 0f, 1f)
-            }
-            Matrix.translateM(mvp, 0, xOffset, 0f, 0f)
-        } else {
-            debug(TAG, "Y-cropping")
-            // Treat video and screen height as 1, and compare height to scale.
-            Matrix.scaleM(
-                    mvp, 0, 1f,
-                    videoHeight.toFloat() / videoWidth / (screenHeight.toFloat() / screenWidth), 1f)
-            // Some video recorder save video frames in direction differs from recoring,
-            // and add a rotation metadata. Need to detect and rotate them.
-            if (videoRotation % 360 != 0) {
-                Matrix.rotateM(mvp, 0, -videoRotation.toFloat(), 0f, 0f, 1f)
-            }
-            Matrix.translateM(mvp, 0, 0f, yOffset, 0f)
-        }
-        // This is a 2D center crop, so we only need model matrix, no view and projection.
+@UiThread
+private fun updateMatrix() {
+//        Log.d("AppLog", "updateMatrix isUiThread:" + (Thread.currentThread().id == Looper.getMainLooper().thread.id))
+    // Players are buggy and unclear, so we do crop by ourselves.
+    // Start with an identify matrix.
+    for (i in 0..15) {
+        mvp[i] = 0.0f
     }
+    mvp[15] = 1.0f
+    mvp[10] = mvp[15]
+    mvp[5] = mvp[10]
+    mvp[0] = mvp[5]
+    // OpenGL model matrix: scaling, rotating, translating.
+    val videoRatio = videoWidth.toFloat() / videoHeight
+    val screenRatio = screenWidth.toFloat() / screenHeight
+    if (videoRatio >= screenRatio) {
+        debug(TAG, "X-cropping")
+        // Treat video and screen width as 1, and compare width to scale.
+        Matrix.scaleM(
+                mvp, 0,
+                videoWidth.toFloat() / videoHeight / (screenWidth.toFloat() / screenHeight), 1f, 1f)
+        // Some video recorder save video frames in direction differs from recoring,
+        // and add a rotation metadata. Need to detect and rotate them.
+        if (videoRotation % 360 != 0) {
+            Matrix.rotateM(mvp, 0, -videoRotation.toFloat(), 0f, 0f, 1f)
+        }
+        Matrix.translateM(mvp, 0, xOffset, 0f, 0f)
+    } else {
+        debug(TAG, "Y-cropping")
+        // Treat video and screen height as 1, and compare height to scale.
+        Matrix.scaleM(
+                mvp, 0, 1f,
+                videoHeight.toFloat() / videoWidth / (screenHeight.toFloat() / screenWidth), 1f)
+        // Some video recorder save video frames in direction differs from recoring,
+        // and add a rotation metadata. Need to detect and rotate them.
+        if (videoRotation % 360 != 0) {
+            Matrix.rotateM(mvp, 0, -videoRotation.toFloat(), 0f, 0f, 1f)
+        }
+        Matrix.translateM(mvp, 0, 0f, yOffset, 0f)
+    }
+    // This is a 2D center crop, so we only need model matrix, no view and projection.
+}
 
     companion object {
         private const val TAG = "GLES30WallpaperRenderer"
@@ -287,7 +282,6 @@ internal class GLES30WallpaperRenderer(context: Context) : GLWallpaperRenderer(c
     }
 
     init {
-
         // Those replaced glGenBuffers() and glBufferData().
         val vertexArray = floatArrayOf( // x, y
                 // bottom left
