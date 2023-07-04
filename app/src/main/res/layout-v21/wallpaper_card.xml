@@ -1,112 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="15dp"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+    android:layout_height="wrap_content" android:layout_marginStart="15dp"
     android:layout_marginEnd="15dp">
-    <android.support.v7.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_marginTop="@dimen/card_margin"
-        android:layout_marginBottom="@dimen/card_margin"
-        android:elevation="3dp"
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:layout_gravity="center" android:layout_marginTop="@dimen/card_margin"
+        android:layout_marginBottom="@dimen/card_margin" android:elevation="3dp"
         card_view:cardCornerRadius="@dimen/card_radius">
+
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent" android:layout_height="match_parent"
             android:orientation="horizontal">
+
             <ImageView
-                android:id="@+id/thumbnail"
-                android:layout_width="@dimen/thumbnail_width"
+                android:id="@+id/thumbnail" android:layout_width="@dimen/thumbnail_width"
                 android:layout_height="@dimen/thumbnail_height"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:contentDescription="@string/wallpaper_thumbnail"
-                android:focusable="true"
-                android:scaleType="fitXY" />
+                android:clickable="true" android:contentDescription="@string/wallpaper_thumbnail"
+                android:focusable="true" android:scaleType="fitXY" />
+
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="match_parent" android:layout_height="match_parent"
                 android:orientation="vertical">
-                <ScrollView
+
+                <androidx.core.widget.NestedScrollView
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/card_scroll_height"
-                    android:scrollbarStyle="outsideOverlay"
-                    android:scrollbars="vertical">
+                    android:scrollbarStyle="outsideOverlay" android:scrollbars="vertical">
+
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/card_scroll_padding">
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" android:padding="@dimen/card_scroll_padding">
+
                         <TextView
-                            android:id="@+id/name"
-                            android:layout_width="match_parent"
+                            android:id="@+id/name" android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="@dimen/card_text_margin"
-                            android:textColor="@color/name"
-                            android:textSize="@dimen/name_size" />
+                            android:textColor="@color/name" android:textSize="@dimen/name_size" />
+
                         <TextView
-                            android:id="@+id/path"
-                            android:layout_width="match_parent"
+                            android:id="@+id/path" android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textSize="@dimen/path_size" />
                     </LinearLayout>
-                </ScrollView>
+                </androidx.core.widget.NestedScrollView>
+
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="bottom|start"
-                    android:orientation="horizontal">
+                    android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:gravity="bottom|start" android:orientation="horizontal">
+
                     <Button
                         android:id="@+id/apply_button"
                         style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:minWidth="0dp"
-                        android:paddingStart="@dimen/card_button_padding"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:minWidth="0dp" android:paddingStart="@dimen/card_button_padding"
                         android:paddingEnd="@dimen/card_button_padding"
-                        android:text="@string/action_apply"
-                        android:textColor="@color/applyButton"
+                        android:text="@string/action_apply" android:textColor="@color/applyButton"
                         android:textSize="@dimen/card_button_text_size" />
+
                     <Button
                         android:id="@+id/current"
                         style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:minWidth="0dp"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:enabled="false" android:minWidth="0dp"
                         android:paddingStart="@dimen/card_button_padding"
                         android:paddingEnd="@dimen/card_button_padding"
-                        android:text="@string/current"
-                        android:textColor="@color/current"
+                        android:text="@string/current" android:textColor="@color/current"
                         android:textSize="@dimen/card_button_text_size" />
+
                     <Button
                         android:id="@+id/internal"
                         style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:minWidth="0dp"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:enabled="false" android:minWidth="0dp"
                         android:paddingStart="@dimen/card_button_padding"
                         android:paddingEnd="@dimen/card_button_padding"
-                        android:text="@string/internal"
-                        android:textColor="@color/internal"
+                        android:text="@string/internal" android:textColor="@color/internal"
                         android:textSize="@dimen/card_button_text_size" />
+
                     <Button
                         android:id="@+id/remove_button"
                         style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:minWidth="0dp"
-                        android:paddingStart="@dimen/card_button_padding"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:minWidth="0dp" android:paddingStart="@dimen/card_button_padding"
                         android:paddingEnd="@dimen/card_button_padding"
-                        android:text="@string/action_remove"
-                        android:textColor="@color/deleteButton"
+                        android:text="@string/action_remove" android:textColor="@color/deleteButton"
                         android:textSize="@dimen/card_button_text_size" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-    </android.support.v7.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 </LinearLayout>
